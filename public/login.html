@@ -53,37 +53,37 @@
                         <div id="userListBlock" class="wide100p">
                             <div id="userList" class="flex-container justifySpaceEvenly"></div>
                             <div id="handleEntryBlock" style="display:none;" class="flex-container flexFlowColumn alignItemsCenter">
-                                <input id="userHandle" class="text_pole" type="text" placeholder="User handle" autocomplete="username">
+                                <input id="userHandle" class="text_pole" type="text" placeholder="用户名" autocomplete="username">
                             </div>
                             <div id="passwordEntryBlock" style="display:none;"
                                 class="flex-container flexFlowColumn alignItemsCenter">
-                                <input id="userPassword" class="text_pole" type="password" placeholder="Password" autocomplete="current-password">
+                                <input id="userPassword" class="text_pole" type="password" placeholder="密码" autocomplete="current-password">
                                 <a id="recoverPassword" href="#" onclick="return false;">密码忘了？</a>
                                 <div class="flex-container flexGap10">
-                                    <div id="loginButton" class="menu_button" data-i18n="Login">登录</div>
-                                    <div id="showRegisterButton" class="menu_button" data-i18n="Register">注册</div>
+                                    <div id="loginButton" class="menu_button">登录</div>
+                                    <div id="showRegisterButton" class="menu_button">注册</div>
                                 </div>
                             </div>
                             <div id="passwordRecoveryBlock" style="display:none;" class="flex-container flexFlowColumn alignItemsCenter">
                                 <div id="recoverMessage">
                                     恢复码已发布到服务器控制台。
                                 </div>
-                                <input id="recoveryCode" class="text_pole" type="text" placeholder="Recovery code">
-                                <input id="newPassword" class="text_pole" type="password" placeholder="New password" autocomplete="new-password">
+                                <input id="recoveryCode" class="text_pole" type="text" placeholder="恢复码">
+                                <input id="newPassword" class="text_pole" type="password" placeholder="新密码" autocomplete="new-password">
                                 <div class="flex-container flexGap10">
                                     <div id="sendRecovery" class="menu_button">发送</div>
                                     <div id="cancelRecovery" class="menu_button">取消</div>
                                 </div>
                             </div>
                             <div id="registerBlock" style="display:none;" class="flex-container flexFlowColumn alignItemsCenter">
-                                <h3 data-i18n="Create New Account">建立一个新账户</h3>
-                                <input id="registerName" class="text_pole" type="text" data-i18n="[placeholder]Display Name" placeholder="Display Name" autocomplete="name" required>
-                                <input id="registerHandle" class="text_pole" type="text" data-i18n="[placeholder]Username (lowercase, letters, numbers, dashes only)" placeholder="Username (lowercase, letters, numbers, dashes only)" autocomplete="username" pattern="[a-z0-9-]+" required>
-                                <input id="registerPassword" class="text_pole" type="password" data-i18n="[placeholder]Password" placeholder="Password" autocomplete="new-password" required>
-                                <input id="registerConfirmPassword" class="text_pole" type="password" data-i18n="[placeholder]Confirm Password" placeholder="Confirm Password" autocomplete="new-password" required>
+                                <h3>建立一个新账户</h3>
+                                <input id="registerName" class="text_pole" type="text" placeholder="显示名称" autocomplete="name" required>
+                                <input id="registerHandle" class="text_pole" type="text" placeholder="用户名（仅限小写字母、数字、连字符）" autocomplete="username" pattern="[a-z0-9-]+" required>
+                                <input id="registerPassword" class="text_pole" type="password" placeholder="密码" autocomplete="new-password" required>
+                                <input id="registerConfirmPassword" class="text_pole" type="password" placeholder="确认密码" autocomplete="new-password" required>
                                 <div class="flex-container flexGap10">
-                                    <div id="registerButton" class="menu_button" data-i18n="Create Account">建立账户</div>
-                                    <div id="cancelRegister" class="menu_button" data-i18n="Cancel">取消</div>
+                                    <div id="registerButton" class="menu_button">建立账户</div>
+                                    <div id="cancelRegister" class="menu_button">取消</div>
                                 </div>
                             </div>
                         </div>
