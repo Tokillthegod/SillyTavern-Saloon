@@ -49,7 +49,7 @@ import {
 } from './users.js';
 
 import getWebpackServeMiddleware from './middleware/webpack-serve.js';
-import basicAuthMiddleware from './middleware/basicAuth.js';
+// import basicAuthMiddleware from './middleware/basicAuth.js'; // Removed - basic auth disabled
 import getWhitelistMiddleware from './middleware/whitelist.js';
 import accessLoggerMiddleware, { getAccessLogPath, migrateAccessLog } from './middleware/accessLogWriter.js';
 import multerMonkeyPatch from './middleware/multerMonkeyPatch.js';
@@ -121,9 +121,10 @@ const CORS = cors({
 
 app.use(CORS);
 
-if (cliArgs.listen && cliArgs.basicAuthMode) {
-    app.use(basicAuthMiddleware);
-}
+// Basic Auth middleware disabled - removed requirement for username/password on new devices
+// if (cliArgs.listen && cliArgs.basicAuthMode) {
+//     app.use(basicAuthMiddleware);
+// }
 
 if (cliArgs.whitelistMode) {
     const whitelistMiddleware = await getWhitelistMiddleware();

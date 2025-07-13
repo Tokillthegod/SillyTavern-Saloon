@@ -197,3 +197,70 @@ router.post('/recover-step2', async (request, response) => {
         return response.sendStatus(500);
     }
 });
+
+router.post('/register', async (request, response) => {
+    try {
+        if (!request.body.handle || !request.body.name || !request.body.password) {
+            console.warn('Register failed: Missing required fields');
+            return response.status(400).json({ error: 'Missing required fields' });
+        }
+
+        const ip = getIpAddress(request);
+        await loginLimiter.consume(ip);
+
+        const { getAllUserHandles, getUserDirectories, ensurePublicDirectoriesExist } = await import('../users.js');
+        const { checkForNewContent, CONTENT_TYPES } = await import('./content-manager.js');
+        const lodash = await import('lodash');
+
+        const handles = await getAllUserHandles();
+        const handle = lodash.default.kebabCase(String(request.body.handle).toLowerCase().trim());
+
+        if (!handle) {
+            console.warn('Register failed: Invalid handle');
+            return response.status(400).json({ error: 'Invalid handle' });
+        }
+
+        if (handles.some(x => x === handle)) {
+            console.warn('Register failed: User with that handle already exists');
+            return response.status(409).json({ error: 'User already exists' });
+        }
+
+        if (request.body.password !== request.body.confirmPassword) {
+            console.warn('Register failed: Passwords do not match');
+            return response.status(400).json({ error: 'Passwords do not match' });
+        }
+
+        const salt = getPasswordSalt();
+        const password = getPasswordHash(request.body.password, salt);
+
+        const newUser = {
+            handle: handle,
+            name: request.body.name || 'Anonymous',
+            created: Date.now(),
+            password: password,
+            salt: salt,
+            admin: false,
+            enabled: true,
+        };
+
+        await storage.setItem(toKey(handle), newUser);
+
+        // Create user directories
+        console.info('Creating data directories for new user:', newUser.handle);
+        await ensurePublicDirectoriesExist();
+        const directories = getUserDirectories(newUser.handle);
+        await checkForNewContent([directories], [CONTENT_TYPES.SETTINGS]);
+
+        await loginLimiter.delete(ip);
+        console.info('User registration successful:', newUser.handle, 'from', ip, 'at', new Date().toLocaleString());
+        return response.json({ handle: newUser.handle, message: 'Registration successful' });
+    } catch (error) {
+        if (error instanceof RateLimiterRes) {
+            console.error('Register failed: Rate limited from', getIpAddress(request));
+            return response.status(429).send({ error: 'Too many attempts. Try again later.' });
+        }
+
+        console.error('Register failed:', error);
+        return response.sendStatus(500);
+    }
+});

@@ -45,6 +45,20 @@ body.login .userSelect:hover {
 
 body.login #handleEntryBlock,
 body.login #passwordEntryBlock,
-body.login #passwordRecoveryBlock {
+body.login #passwordRecoveryBlock,
+body.login #registerBlock {
     margin: 2px;
+}
+
+body.login #registerBlock h3 {
+    margin: 10px 0;
+    color: var(--SmartThemeBodyColor);
+}
+
+body.login .neutral_good {
+    color: var(--green);
+}
+
+body.login .flexGap10 {
+    gap: 10px;
 }

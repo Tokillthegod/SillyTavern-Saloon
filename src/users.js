@@ -150,9 +150,10 @@ export async function verifySecuritySettings() {
         return;
     }
 
-    if (!ENABLE_ACCOUNTS) {
-        logSecurityAlert('Your current SillyTavern configuration is insecure (listening to non-localhost). Enable whitelisting, basic authentication or user accounts.');
-    }
+    // Security check disabled - basic auth middleware has been removed
+    // if (!ENABLE_ACCOUNTS) {
+    //     logSecurityAlert('Your current SillyTavern configuration is insecure (listening to non-localhost). Enable whitelisting, basic authentication or user accounts.');
+    // }
 
     const users = await getAllEnabledUsers();
     const unprotectedUsers = users.filter(x => !x.password);
@@ -165,9 +166,10 @@ export async function verifySecuritySettings() {
         console.warn(`Consider setting a password in the admin panel or by using the ${color.blue('recover.js')} script.`);
         console.log();
 
-        if (unprotectedAdminUsers.length > 0) {
-            logSecurityAlert('If you are not using basic authentication or whitelisting, you should set a password for all admin users.');
-        }
+        // Admin password security check disabled - basic auth has been removed
+        // if (unprotectedAdminUsers.length > 0) {
+        //     logSecurityAlert('If you are not using basic authentication or whitelisting, you should set a password for all admin users.');
+        // }
     }
 
     if (basicAuthMode) {
