@@ -1,416 +1,235 @@
-<a name="readme-top"></a>
-
-![][cover]
+# SillyTavern - 多用户增强版
 
 <div align="center">
-
-English | [German](readme-de_de.md) | [中文](readme-zh_cn.md) | [繁體中文](readme-zh_tw.md) | [日本語](readme-ja_jp.md) | [Русский](readme-ru_ru.md) | [한국어](readme-ko_kr.md)
 
 [![GitHub Stars](https://img.shields.io/github/stars/SillyTavern/SillyTavern.svg)](https://github.com/SillyTavern/SillyTavern/stargazers)
 [![GitHub Forks](https://img.shields.io/github/forks/SillyTavern/SillyTavern.svg)](https://github.com/SillyTavern/SillyTavern/forks)
 [![GitHub Issues](https://img.shields.io/github/issues/SillyTavern/SillyTavern.svg)](https://github.com/SillyTavern/SillyTavern/issues)
-[![GitHub Pull Requests](https://img.shields.io/github/issues-pr/SillyTavern/SillyTavern.svg)](https://github.com/SillyTavern/SillyTavern/pulls)
+
+**🌟 专为多用户环境优化的SillyTavern分支版本 🌟**
 
 </div>
 
 ---
 
-SillyTavern provides a single unified interface for many LLM APIs (KoboldAI/CPP, Horde, NovelAI, Ooba, Tabby, OpenAI, OpenRouter, Claude, Mistral and more), a mobile-friendly layout, Visual Novel Mode, Automatic1111 & ComfyUI API image generation integration, TTS, WorldInfo (lorebooks), customizable UI, auto-translate, more prompt options than you'd ever want or need, and endless growth potential via third-party extensions.
+## 📖 项目简介
 
-We have a [Documentation website](https://docs.sillytavern.app/) to answer most of your questions and help you get started.
+这是一个基于官方SillyTavern的增强版本，**主要特色是完整的多用户登录系统**。SillyTavern是一个功能强大的本地安装用户界面，允许您与文本生成LLM、图像生成引擎和TTS语音模型进行交互。
 
-## What is SillyTavern?
+本分支版本在保持原有所有功能的基础上，专门针对多用户使用场景进行了优化和增强。
 
-SillyTavern (or ST for short) is a locally installed user interface that allows you to interact with text generation LLMs, image generation engines, and TTS voice models.
+## 🚀 主要特色功能
 
-Beginning in February 2023 as a fork of TavernAI 1.2.8, SillyTavern now has over 200 contributors and 2 years of independent development under its belt, and continues to serve as a leading software for savvy AI hobbyists.
+### 🔐 完整的多用户系统
+- **用户注册与登录**: 支持多个用户独立注册和登录
+- **用户权限管理**: 管理员可以管理其他用户账户
+- **密码保护**: 每个用户可以设置独立的密码保护
+- **会话管理**: 安全的用户会话和自动登录功能
+- **数据隔离**: 每个用户拥有独立的数据目录和配置
 
-## Our Vision
+### 🛡️ 安全特性
+- **CSRF保护**: 内置跨站请求伪造保护
+- **速率限制**: 登录和注册请求的速率限制
+- **密码恢复**: 安全的密码重置机制
+- **隐私登录模式**: 可选的隐私登录界面
 
-1. We aim to empower users with as much utility and control over their LLM prompts as possible. The steep learning curve is part of the fun!
-2. We do not provide any online or hosted services, nor programmatically track any user data.
-3. SillyTavern is a passion project brought to you by a dedicated community of LLM enthusiasts, and will always be free and open sourced.
+### 👥 用户管理功能
+- **管理员面板**: 完整的用户管理界面
+- **用户启用/禁用**: 管理员可以启用或禁用用户账户
+- **权限提升**: 可以将普通用户提升为管理员
+- **用户数据备份**: 支持用户数据的导出和备份
+- **批量用户操作**: 支持批量管理用户账户
 
-## Branches
+### 🔧 配置选项
+- **enableUserAccounts**: 启用/禁用多用户模式
+- **enableDiscreetLogin**: 启用隐私登录模式（隐藏用户列表）
+- **autheliaAuth**: 支持Authelia认证集成
+- **perUserBasicAuth**: 每用户基础认证
+- **sessionTimeout**: 可配置的会话超时时间
 
-SillyTavern is being developed using a two-branch system to ensure a smooth experience for all users.
+## 📁 用户数据结构
 
-* `release` -🌟 **Recommended for most users.** This is the most stable and recommended branch, updated only when major releases are pushed. It's suitable for the majority of users. Typically updated once a month.
-* `staging` - ⚠️ **Not recommended for casual use.** This branch has the latest features, but be cautious as it may break at any time. Only for power users and enthusiasts. Updates several times daily.
-
-If you're not familiar with using the git CLI or don't understand what a branch is, don't worry! The release branch is always the preferable option for you.
-
-## What do I need other than SillyTavern?
-
-Since SillyTavern is only an interface, you will need access to an LLM backend to provide inference. You can use AI Horde for instant out-of-the-box chatting. Aside from that, we support many other local and cloud-based LLM backends: OpenAI-compatible API, KoboldAI, Tabby, and many more. You can read more about our supported APIs in [the Docs](https://docs.sillytavern.app/usage/api-connections/).
-
-### Do I need a powerful PC to run SillyTavern?
-
-The hardware requirements are minimal: it will run on anything that can run NodeJS 18 or higher. If you intend to do LLM inference on your local machine, we recommend a 3000-series NVIDIA graphics card with at least 6GB of VRAM. Check your backend's documentation for more details.
-
-### Suggested Backends (not affiliated)
-
-* [AI Horde](https://aihorde.net/) - use models hosted by volunteers. Requires no further setup
-* [KoboldCpp](https://github.com/LostRuins/koboldcpp) - a community's favorite for running GGUF models locally
-* [tabbyAPI](https://github.com/theroyallab/tabbyAPI) - a popular, lightweight, locally-hosted exl2 inference API
-* [OpenRouter](https://openrouter.ai) - a single API for many cloud providers (OpenAI, Claude, Meta Llama, etc.) as well as popular community models.
-
-## Questions or suggestions?
-
-### Discord server
-
-| [![][discord-shield-badge]][discord-link] | [Join our Discord community!](https://discord.gg/sillytavern) Get support, share favorite characters and prompts. |
-| :---------------------------------------- | :----------------------------------------------------------------------------------------------------------------- |
-
-Or get in touch with the developers directly:
-
-* Discord: cohee, rossascends, wolfsblvt
-* Reddit: [/u/RossAscends](https://www.reddit.com/user/RossAscends/), [/u/sillylossy](https://www.reddit.com/user/sillylossy/), [u/Wolfsblvt](https://www.reddit.com/user/Wolfsblvt/)
-* [Post a GitHub issue](https://github.com/SillyTavern/SillyTavern/issues)
-
-### I like your project! How do I contribute?
-
-1. Send pull requests. Learn how to contribute: [CONTRIBUTING.md](../CONTRIBUTING.md)
-2. Send feature suggestions and issue reports using the provided templates.
-3. Read this entire readme file and check the documentation website first, to avoid sending duplicate issues.
-
-## Screenshots
-
-<img width="500" alt="image" src="https://github.com/user-attachments/assets/9b5f32f0-c3b3-4102-b3f5-0e9213c0f50f">
-<img width="500" alt="image" src="https://github.com/user-attachments/assets/913fdbaa-7d33-42f1-ae2c-89dca41c53d1">
-
-## Character Cards
-
-SillyTavern is built around the concept of "character cards". A character card is a collection of prompts that set the behavior of the LLM and is required to have persistent conversations in SillyTavern. They function similarly to ChatGPT's GPTs or Poe's bots. The content of a character card can be anything: an abstract scenario, an assistant tailored for a specific task, a famous personality or a fictional character.
-
-To have a quick conversation without selecting a character card or to just test the LLM connection, simply type your prompt input into the input bar on the Welcome Screen after opening SillyTavern. This will create an empty "Assistant" character card that you can customize later.
-
-To get a general idea on how to define character cards, see the default character (Seraphina) or download selected community-made cards from the "Download Extensions & Assets" menu.
-
-## Key Features
-
-* Advanced text generation settings with many community-made presets
-* World Info support: create rich lore or save tokens on your character card
-* Group chats: multi-bot rooms for characters to talk to you and/or each other
-* Rich UI customization options: theme colors, background images, custom CSS, and more
-* User personas: let the AI know a bit about you for greater immersion
-* Built-in RAG support: add documents to your chats for the AI to reference
-* Extensive chat commands subsystem and own [scripting engine](https://docs.sillytavern.app/usage/st-script/)
-
-## Extensions
-
-SillyTavern has extensibility support.
-
-* Character emotional expressions (sprites)
-* Auto-Summary of the chat history
-* Automatic UI and chat translation
-* Stable Diffusion/FLUX/DALL-E image generation
-* Text-to-speech for AI response messages (via ElevenLabs, Silero, or the OS's System TTS)
-* Web Search capabilities for adding additional real world context to your prompts
-* Many more are available to download from the "Download Extensions & Assets" menu.
-
-Tutorials on how to use them can be found in the [Docs](https://docs.sillytavern.app/).
-
-## ⌛ Installation
-
-### 🪟 Windows
-
-> \[!WARNING]
->
-> * DO NOT INSTALL INTO ANY WINDOWS CONTROLLED FOLDER (Program Files, System32, etc).
-> * DO NOT RUN START.BAT WITH ADMIN PERMISSIONS
-> * INSTALLATION ON WINDOWS 7 IS IMPOSSIBLE AS IT CAN NOT RUN NODEJS 18.16
-
-#### Installing via Git (recommended)
-
-1. Install [NodeJS](https://nodejs.org/en) (latest LTS version is recommended)
-2. Install [Git for Windows](https://gitforwindows.org/)
-3. Open Windows Explorer (`Win+E`)
-4. Browse to or Create a folder that is not controlled or monitored by Windows. (ex: C:\MySpecialFolder\)
-5. Open a Command Prompt inside that folder by clicking in the 'Address Bar' at the top, typing `cmd`, and pressing Enter.
-6. Once the black box (Command Prompt) pops up, type ONE of the following into it and press Enter:
-
-* for Release Branch: `git clone https://github.com/SillyTavern/SillyTavern -b release`
-* for Staging Branch: `git clone https://github.com/SillyTavern/SillyTavern -b staging`
-
-7. Once everything is cloned, double-click `Start.bat` to make NodeJS install its requirements.
-8. The server will then start, and SillyTavern will pop up in your browser.
-
-#### Installing via GitHub Desktop
-
-(This allows git usage **only** in GitHub Desktop, if you want to use `git` on the command line too, you also need to install [Git for Windows](https://gitforwindows.org/))
-
-  1. Install [NodeJS](https://nodejs.org/en) (latest LTS version is recommended)
-  2. Install [GitHub Desktop](https://central.github.com/deployments/desktop/desktop/latest/win32)
-  3. After installing GitHub Desktop, click on `Clone a repository from the internet....` (Note: You **do NOT need** to create a GitHub account for this step)
-  4. On the menu, click the URL tab, enter this URL `https://github.com/SillyTavern/SillyTavern`, and click Clone. You can change the Local path to change where SillyTavern is going to be downloaded.
-  6. To open SillyTavern, use Windows Explorer to browse into the folder where you cloned the repository. By default, the repository will be cloned here: `C:\Users\[Your Windows Username]\Documents\GitHub\SillyTavern`
-  7. Double-click on the `start.bat` file. (Note: the `.bat` part of the file name might be hidden by your OS, in that case, it will look like a file called "`Start`". This is what you double-click to run SillyTavern)
-  8. After double-clicking, a large black command console window should open and SillyTavern will begin to install what it needs to operate.
-  9. After the installation process, if everything is working, the command console window should look like this and a SillyTavern tab should be open in your browser:
-  10. Connect to any of the [supported APIs](https://docs.sillytavern.app/usage/api-connections/) and start chatting!
-
-### 🐧 Linux & 🍎 MacOS
-
-For MacOS / Linux all of these will be done in a Terminal.
-
-1. Install git and nodeJS (the method for doing this will vary depending on your OS)
-2. Clone the repo
-
-* for Release Branch: `git clone https://github.com/SillyTavern/SillyTavern -b release`
-* for Staging Branch: `git clone https://github.com/SillyTavern/SillyTavern -b staging`
-
-3. `cd SillyTavern` to navigate into the install folder.
-4. Run the `start.sh` script with one of these commands:
-
-* `./start.sh`
-* `bash start.sh`
-
-## 🐋 Installing via Docker
-
-These instructions assume you have installed Docker, are able to access your command line for the installation of containers, and familiar with their general operation.
-
-### Using the GitHub Container Registry
-
-#### Docker Compose (easiest)
-
-Grab the `docker-compose.yml` file from the [GitHub Repository](https://github.com/SillyTavern/SillyTavern/blob/release/docker/docker-compose.yml) and run the following command in the directory where the file is located. This will pull the latest release image from the GitHub Container Registry and start the container, automatically creating the necessary volumes.
-
-```shell
-docker-compose up
+每个用户都有独立的数据目录结构：
+```
+data/
+├── [username]/
+│   ├── characters/          # 角色卡片
+│   ├── chats/              # 聊天记录
+│   ├── backgrounds/        # 背景图片
+│   ├── User Avatars/       # 用户头像
+│   ├── worlds/             # 世界信息
+│   ├── groups/             # 群组设置
+│   ├── themes/             # 主题配置
+│   ├── extensions/         # 扩展插件
+│   ├── settings.json       # 用户设置
+│   └── secrets.json        # 密钥配置
+└── _storage/               # 用户账户信息
 ```
 
-Customize the `docker-compose.yml` file to your needs. The default port is 8000. If you want to adjust the server configuration using environment variables, read the documentation [here](https://docs.sillytavern.app/administration/config-yaml/#environment-variables).
+## 🛠️ 安装和配置
 
-#### Docker CLI (advanced)
-
-You will need two mandatory directory mappings and a port mapping to allow SillyTavern to function. In the command, replace your selections in the following places:
-
-#### Container Variables
-
-##### Volume Mappings
-
-* `CONFIG_PATH` - The directory where SillyTavern configuration files will be stored on your host machine
-* `DATA_PATH` - The directory where SillyTavern user data (including characters) will be stored on your host machine
-* `PLUGINS_PATH` - (optional) The directory where SillyTavern server plugins will be stored on your host machine
-* `EXTENSIONS_PATH` - (optional) The directory where global UI extensions will be stored on your host machine
-
-##### Port Mappings
-
-* `PUBLIC_PORT` - The port to expose the traffic on. This is mandatory, as you will be accessing the instance from outside of its virtual machine container. DO NOT expose this to the internet without implementing a separate service for security.
-
-##### Additional Settings
-
-* `SILLYTAVERN_VERSION` - On the right-hand side of this GitHub page, you'll see "Packages". Select the "sillytavern" package and you'll see the image versions. The image tag "latest" will keep you up-to-date with the current release. You can also utilize "staging" that points to the nightly image of the respective branch.
-
-#### Running the container
-
-1. Open your Command Line
-2. Run the following command in a folder where you want to store the configuration and data files:
-
+### 基础安装
 ```bash
-SILLYTAVERN_VERSION="latest"
-PUBLIC_PORT="8000"
-CONFIG_PATH="./config"
-DATA_PATH="./data"
-PLUGINS_PATH="./plugins"
-EXTENSIONS_PATH="./extensions"
+# 克隆仓库
+git clone [your-fork-url]
+cd SillyTavern
 
-docker run \
-  --name="sillytavern" \
-  -p "$PUBLIC_PORT:8000/tcp" \
-  -v "$CONFIG_PATH:/home/node/app/config:rw" \
-  -v "$DATA_PATH:/home/node/app/data:rw" \
-  -v "$EXTENSIONS_PATH:/home/node/app/public/scripts/extensions/third-party:rw" \
-  -v "$PLUGINS_PATH:/home/node/app/plugins:rw" \
-  ghcr.io/sillytavern/sillytavern:"$SILLYTAVERN_VERSION"
+# 安装依赖
+npm install
+
+# 启动服务器
+npm start
 ```
 
-> By default the container will run in the foreground. If you want to run it in the background, add the `-d` flag to the `docker run` command.
+### 启用多用户模式
 
-### Building the image yourself
+1. **修改配置文件** (`default/config.yaml`):
+```yaml
+# 启用多用户模式
+enableUserAccounts: true
 
-We have a comprehensive guide on using SillyTavern in Docker [here](http://docs.sillytavern.app/installation/docker/) which covers installations on Windows, macOS and Linux! Give it a read if you wish to build the image yourself.
+# 可选：启用隐私登录模式
+enableDiscreetLogin: false
 
-### Common issues with Docker
+# 可选：配置会话超时（秒）
+sessionTimeout: 86400  # 24小时
+```
 
-#### SELinux Permission Issues with Mounted Volumes
+2. **启动服务器**:
+```bash
+node server.js --enableUserAccounts
+```
 
-Linux distributions with SELinux enabled (such as RHEL, CentOS, Fedora, etc.) may prevent Docker containers from accessing mounted volumes due to security policies. This can result in permission denied errors when the container tries to read or write to the mounted directories.
+3. **访问登录页面**:
+打开浏览器访问 `http://localhost:8000/login`
 
-Two suffixes `:z` or `:Z` can be added to the volume mount. These suffixes tell Docker to relabel file objects on the shared volumes.
+### 首次设置
 
-* The `z` option is used when the volume content will be shared between containers.
-* The `Z` option is used when the volume content should only be used by the current container.
+1. 首次启动时会自动创建默认管理员账户
+2. 访问登录页面进行用户注册
+3. 第一个注册的用户将自动获得管理员权限
+4. 后续用户可以通过注册页面创建账户
 
-Example:
+## 👤 用户管理
 
+### 管理员功能
+- 查看所有用户列表
+- 启用/禁用用户账户
+- 提升/降级用户权限
+- 删除用户账户（可选择是否删除数据）
+- 重置用户密码
+
+### 用户功能
+- 注册新账户
+- 登录/登出
+- 修改个人信息
+- 密码重置
+- 数据备份导出
+
+## 🔒 安全配置
+
+### 密码策略
+- 支持强密码要求
+- 密码使用scrypt加密存储
+- 每个用户独立的密码盐值
+
+### 会话安全
+- 安全的cookie会话管理
+- 可配置的会话超时
+- 自动登录功能（可选）
+
+### 网络安全
+- CSRF令牌保护
+- 请求速率限制
+- IP地址记录和监控
+
+## 🌐 高级配置
+
+### Authelia集成
+```yaml
+# 启用Authelia认证
+autheliaAuth: true
+```
+
+### 反向代理配置
+支持Nginx、Traefik、Caddy等反向代理，可配置：
+- SSL终止
+- 负载均衡
+- 访问控制
+
+### Docker部署
 ```yaml
 # docker-compose.yml
-volumes:
-  ## Shared volume
-  - ./config:/home/node/app/config:z
-  ## Private volume
-  - ./data:/home/node/app/data:Z
+version: '3.8'
+services:
+  sillytavern:
+    build: .
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./data:/app/data
+    environment:
+      - ENABLE_USER_ACCOUNTS=true
 ```
 
-## ⚡ Installing via SillyTavern Launcher
+## 📚 API文档
 
-SillyTavern Launcher is an installation wizard that will help you get setup with many options, including installing a backend for local inference.
+### 用户管理API
+- `POST /api/users/register` - 用户注册
+- `POST /api/users/login` - 用户登录
+- `POST /api/users/list` - 获取用户列表
+- `POST /api/users/admin/get` - 管理员获取用户信息
+- `POST /api/users/admin/create` - 管理员创建用户
+- `POST /api/users/admin/delete` - 管理员删除用户
 
-### For Windows users
+## 🔧 故障排除
 
-1. On your keyboard: press **`WINDOWS + R`** to open Run dialog box. Then, run the following command to install git:
+### 常见问题
 
-```shell
-cmd /c winget install -e --id Git.Git
+**Q: 无法访问登录页面？**
+A: 确保在config.yaml中设置了`enableUserAccounts: true`
+
+**Q: 忘记管理员密码？**
+A: 使用`recover.js`脚本重置密码：
+```bash
+node recover.js --user admin
 ```
 
-2. On your keyboard: press **`WINDOWS + E`** to open File Explorer, then navigate to the folder where you want to install the launcher. Once in the desired folder, type `cmd` into the address bar and press enter. Then, run the following command:
+**Q: 用户数据丢失？**
+A: 检查data目录权限，确保SillyTavern有读写权限
 
-```shell
-git clone https://github.com/SillyTavern/SillyTavern-Launcher.git && cd SillyTavern-Launcher && start installer.bat
-```
+**Q: 会话频繁过期？**
+A: 调整`sessionTimeout`配置或设置为-1禁用超时
 
-### For Linux users
+## 🤝 贡献指南
 
-1. Open your favorite terminal and install git
-2. Git clone the Sillytavern-Launcher with:
+1. Fork本仓库
+2. 创建功能分支 (`git checkout -b feature/AmazingFeature`)
+3. 提交更改 (`git commit -m 'Add some AmazingFeature'`)
+4. 推送到分支 (`git push origin feature/AmazingFeature`)
+5. 开启Pull Request
 
-```shell
-git clone https://github.com/SillyTavern/SillyTavern-Launcher.git && cd SillyTavern-Launcher
-```
+## 📄 许可证
 
-3. Start the installer.sh with:
+本项目基于GNU Affero General Public License v3.0许可证开源。
 
-```shell
-chmod +x install.sh && ./install.sh
-```
+## 🙏 致谢
 
-4. After installation start the launcher.sh with:
+- 感谢[SillyTavern](https://github.com/SillyTavern/SillyTavern)原项目团队
+- 感谢所有贡献者和社区成员
+- 特别感谢多用户功能的测试用户
 
-```shell
-chmod +x launcher.sh && ./launcher.sh
-```
+## 📞 支持与联系
 
-### For Mac users
+- 🐛 [报告Bug](../../issues)
+- 💡 [功能建议](../../issues)
+- 📖 [文档](https://docs.sillytavern.app/)
+- 💬 [Discord社区](https://discord.gg/sillytavern)
 
-1. Open a terminal and install brew with:
+---
 
-```shell
-/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-```
+<div align="center">
 
-2. Install git with:
+**⭐ 如果这个项目对您有帮助，请给我们一个星标！ ⭐**
 
-```shell
-brew install git
-```
-
-3. Git clone the Sillytavern-Launcher with:
-
-```shell
-git clone https://github.com/SillyTavern/SillyTavern-Launcher.git && cd SillyTavern-Launcher
-```
-
-4. Start the installer.sh with:
-
-```shell
-chmod +x install.sh && ./install.sh
-```
-
-5. After installation start the launcher.sh with:
-
-```shell
-chmod +x launcher.sh && ./launcher.sh
-```
-
-## 📱 Installing via Termux on Android OS
-
-> \[!NOTE]
-> **SillyTavern can be run natively on Android devices using Termux, but we do not provide official support for this use case.**
->
-> **Please refer to this guide by ArroganceComplex#2659:**
->
-> * <https://rentry.org/STAI-Termux>
-
-**Unsupported platform: android arm LEtime-web.** 32-bit Android requires an external dependency that can't be installed with npm. Use the following command to install it: `pkg install esbuild`. Then run the usual installation steps.
-
-## Command-line arguments
-
-You can pass command-line arguments to SillyTavern server startup to override some settings in `config.yaml`.
-
-### Examples
-
-```shell
-node server.js --port 8000 --listen false
-# or
-npm run start -- --port 8000 --listen false
-# or (Windows only)
-Start.bat --port 8000 --listen false
-```
-
-### Supported arguments
-
-> \[!TIP]
-> None of the arguments are required. If you don't provide them, SillyTavern will use the settings in `config.yaml`.
-
-| Option                          | Description                                                          | Type     |
-|---------------------------------|----------------------------------------------------------------------|----------|
-| `--version`                     | Show version number                                                  | boolean  |
-| `--configPath`                  | Override the path to the config.yaml file                            | string   |
-| `--dataRoot`                    | Root directory for data storage                                      | string   |
-| `--port`                        | Sets the port under which SillyTavern will run                       | number   |
-| `--listen`                      | SillyTavern will listen on all network interfaces                    | boolean  |
-| `--whitelist`                   | Enables whitelist mode                                               | boolean  |
-| `--basicAuthMode`               | Enables basic authentication                                         | boolean  |
-| `--enableIPv4`                  | Enables IPv4 protocol                                                | boolean  |
-| `--enableIPv6`                  | Enables IPv6 protocol                                                | boolean  |
-| `--listenAddressIPv4`           | Specific IPv4 address to listen to                                   | string   |
-| `--listenAddressIPv6`           | Specific IPv6 address to listen to                                   | string   |
-| `--dnsPreferIPv6`               | Prefers IPv6 for DNS                                                 | boolean  |
-| `--ssl`                         | Enables SSL                                                          | boolean  |
-| `--certPath`                    | Path to your certificate file                                        | string   |
-| `--keyPath`                     | Path to your private key file                                        | string   |
-| `--browserLaunchEnabled`        | Automatically launch SillyTavern in the browser                      | boolean  |
-| `--browserLaunchHostname`       | Browser launch hostname                                              | string   |
-| `--browserLaunchPort`           | Overrides the port for browser launch                                | string   |
-| `--browserLaunchAvoidLocalhost` | Avoids using 'localhost' for browser launch in auto mode             | boolean  |
-| `--corsProxy`                   | Enables CORS proxy                                                   | boolean  |
-| `--requestProxyEnabled`         | Enables a use of proxy for outgoing requests                         | boolean  |
-| `--requestProxyUrl`             | Request proxy URL (HTTP or SOCKS protocols)                          | string   |
-| `--requestProxyBypass`          | Request proxy bypass list (space separated list of hosts)            | array    |
-| `--disableCsrf`                 | Disables CSRF protection (NOT RECOMMENDED)                           | boolean  |
-
-## Remote connections
-
-Most often this is for people who want to use SillyTavern on their mobile phones while their PC runs the ST server on the same Wi-Fi network. However, it can be used to allow remote connections from anywhere as well.
-
-Read the detailed guide on how to set up remote connections in the [Docs](https://docs.sillytavern.app/usage/remoteconnections/).
-
-You may also want to configure SillyTavern user profiles with (optional) password protection: [Users](https://docs.sillytavern.app/administration/multi-user/).
-
-## License and credits
-
-**This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU Affero General Public License for more details.**
-
-* [TavernAI](https://github.com/TavernAI/TavernAI) 1.2.8 by Humi: MIT License
-* Portions of CncAnon's TavernAITurbo mod used with permission
-* Visual Novel Mode inspired by the work of PepperTaco (<https://github.com/peppertaco/Tavern/>)
-* Noto Sans font by Google (OFL license)
-* Icon theme by Font Awesome <https://fontawesome.com> (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License)
-* Default content by @OtisAlejandro (Seraphina character and lorebook) and @kallmeflocc (10K Discord Users Celebratory Background)
-* Docker guide by [@mrguymiah](https://github.com/mrguymiah) and [@Bronya-Rand](https://github.com/Bronya-Rand)
-* kokoro-js library by [@hexgrad](https://github.com/hexgrad) (Apache-2.0 License)
-
-## Top Contributors
-
-[![Contributors](https://contrib.rocks/image?repo=SillyTavern/SillyTavern)](https://github.com/SillyTavern/SillyTavern/graphs/contributors)
-
-<!-- LINK GROUP -->
-[cover]: https://github.com/user-attachments/assets/01a6ae9a-16aa-45f2-8bff-32b5dc587e44
-[discord-link]: https://discord.gg/sillytavern
-[discord-shield-badge]: https://img.shields.io/discord/1100685673633153084?color=5865F2&label=discord&labelColor=black&logo=discord&logoColor=white&style=for-the-badge
+</div>
