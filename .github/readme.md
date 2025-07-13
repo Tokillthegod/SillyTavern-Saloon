@@ -71,7 +71,7 @@ data/
 ### 基础安装
 ```bash
 # 克隆仓库
-git clone [your-fork-url]
+git clone https://github.com/SanVenturas/SillyTavern.git
 cd SillyTavern
 
 # 安装依赖
@@ -218,13 +218,6 @@ A: 调整`sessionTimeout`配置或设置为-1禁用超时
 - 感谢[SillyTavern](https://github.com/SillyTavern/SillyTavern)原项目团队
 - 感谢所有贡献者和社区成员
 - 特别感谢多用户功能的测试用户
-
-## 📞 支持与联系
-
-- 🐛 [报告Bug](../../issues)
-- 💡 [功能建议](../../issues)
-- 📖 [文档](https://docs.sillytavern.app/)
-- 💬 [Discord社区](https://discord.gg/sillytavern)
 
 ---
 
