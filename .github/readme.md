@@ -199,15 +199,7 @@ node recover.js --user admin
 A: 检查data目录权限，确保SillyTavern有读写权限
 
 **Q: 会话频繁过期？**
-A: 调整`sessionTimeout`配置或设置为-1禁用超时
-
-## 🤝 贡献指南
-
-1. Fork本仓库
-2. 创建功能分支 (`git checkout -b feature/AmazingFeature`)
-3. 提交更改 (`git commit -m 'Add some AmazingFeature'`)
-4. 推送到分支 (`git push origin feature/AmazingFeature`)
-5. 开启Pull Request
+A: 调整`sessionTimeout`配置或设置为-1禁用超时 
 
 ## 📄 许可证
 
@@ -216,8 +208,6 @@ A: 调整`sessionTimeout`配置或设置为-1禁用超时
 ## 🙏 致谢
 
 - 感谢[SillyTavern](https://github.com/SillyTavern/SillyTavern)原项目团队
-- 感谢所有贡献者和社区成员
-- 特别感谢多用户功能的测试用户
 
 ---
 
