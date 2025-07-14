@@ -30,6 +30,7 @@
     <!-- fontawesome webfonts-->
     <link href="css/fontawesome.min.css" rel="stylesheet">
     <link href="css/solid.min.css" rel="stylesheet">
+    <link href="css/brands.min.css" rel="stylesheet">
     <link href="css/user.css" rel="stylesheet">
     <title>SillyTavern</title>
 </head>
@@ -44,6 +45,12 @@
                             <img src="img/logo.png" alt="SillyTavern" class="logo">
                             <span>欢迎来到SillyTavern</span>
                         </h2>
+                        <div class="github-badge-container" style="margin: 10px 0;">
+                            <a href="https://github.com/SanVenturas/SillyTavern" target="_blank" rel="noopener noreferrer" class="github-badge">
+                                <i class="fa-brands fa-github" style="margin-right: 8px; font-size: 16px;"></i>
+                                <span>兼容多人的SillyTavern分支</span>
+                            </a>
+                        </div>
                         <h3 id="normalLoginPrompt">
                             选择一个账户
                         </h3>
@@ -66,7 +73,7 @@
                             </div>
                             <div id="passwordRecoveryBlock" style="display:none;" class="flex-container flexFlowColumn alignItemsCenter">
                                 <div id="recoverMessage">
-                                    恢复码已发布到服务器控制台。
+                                    点击"发送"按钮生成恢复码。
                                 </div>
                                 <input id="recoveryCode" class="text_pole" type="text" placeholder="恢复码">
                                 <input id="newPassword" class="text_pole" type="password" placeholder="新密码" autocomplete="new-password">

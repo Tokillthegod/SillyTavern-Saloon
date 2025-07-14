@@ -62,3 +62,52 @@ body.login .neutral_good {
 body.login .flexGap10 {
     gap: 10px;
 }
+
+/* GitHub badge styles */
+body.login .github-badge-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+body.login .github-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 8px 16px;
+    background: linear-gradient(135deg, #24292e 0%, #1a1e22 100%);
+    color: #ffffff;
+    text-decoration: none;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    border: 1px solid #30363d;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+body.login .github-badge:hover {
+    background: linear-gradient(135deg, #2c3237 0%, #21262d 100%);
+    color: #ffffff;
+    text-decoration: none;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+body.login .github-badge:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+body.login .github-badge i {
+    color: #ffffff;
+}
+
+/* Dark theme compatibility */
+body.login.dark .github-badge {
+    background: linear-gradient(135deg, #21262d 0%, #161b22 100%);
+    border-color: #30363d;
+}
+
+body.login.dark .github-badge:hover {
+    background: linear-gradient(135deg, #30363d 0%, #21262d 100%);
+}

@@ -198,6 +198,39 @@ router.post('/recover-step2', async (request, response) => {
     }
 });
 
+router.post('/get-recovery-code', async (request, response) => {
+    try {
+        if (!request.body.handle) {
+            console.warn('Get recovery code failed: Missing required fields');
+            return response.status(400).json({ error: 'Missing required fields' });
+        }
+
+        /** @type {import('../users.js').User} */
+        const user = await storage.getItem(toKey(request.body.handle));
+
+        if (!user) {
+            console.error('Get recovery code failed: User', request.body.handle, 'not found');
+            return response.status(404).json({ error: 'User not found' });
+        }
+
+        if (!user.enabled) {
+            console.error('Get recovery code failed: User', user.handle, 'is disabled');
+            return response.status(403).json({ error: 'User is disabled' });
+        }
+
+        const mfaCode = MFA_CACHE.get(user.handle);
+        
+        if (!mfaCode) {
+            return response.status(404).json({ error: 'No recovery code found. Please request a new one.' });
+        }
+
+        return response.json({ code: mfaCode });
+    } catch (error) {
+        console.error('Get recovery code failed:', error);
+        return response.sendStatus(500);
+    }
+});
+
 router.post('/register', async (request, response) => {
     try {
         if (!request.body.handle || !request.body.name || !request.body.password) {

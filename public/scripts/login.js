@@ -174,6 +174,41 @@ function configureNormalLogin(userList) {
         $('#registerPassword').val('');
         $('#registerConfirmPassword').val('');
     });
+
+    // Add login button functionality for discreet mode
+    $('#loginButton').off('click').on('click', async () => {
+        const handle = $('#userHandle').val();
+        const password = $('#userPassword').val();
+
+        if (!handle || !password) {
+            return displayError('请输入用户名和密码');
+        }
+
+        try {
+            const response = await fetch('/api/users/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-Token': csrfToken,
+                },
+                body: JSON.stringify({
+                    handle: handle,
+                    password: password,
+                }),
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                return displayError(errorData.error || '登录失败');
+            }
+
+            // Login successful, redirect to main page
+            window.location.href = '/';
+        } catch (error) {
+            console.error('Login failed:', error);
+            displayError('网络错误，请重试');
+        }
+    });
 }
 
 /**
@@ -223,6 +258,41 @@ function configureDiscreetLogin() {
         $('#registerPassword').val('');
         $('#registerConfirmPassword').val('');
     });
+
+    // Add login button functionality
+    $('#loginButton').off('click').on('click', async () => {
+        const handle = $('#userHandle').val();
+        const password = $('#userPassword').val();
+
+        if (!handle || !password) {
+            return displayError('请输入用户名和密码');
+        }
+
+        try {
+            const response = await fetch('/api/users/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-Token': csrfToken,
+                },
+                body: JSON.stringify({
+                    handle: handle,
+                    password: password,
+                }),
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                return displayError(errorData.error || '登录失败');
+            }
+
+            // Login successful, redirect to main page
+            window.location.href = '/';
+        } catch (error) {
+            console.error('Login failed:', error);
+            displayError('网络错误，请重试');
+        }
+    });
 }
 
 (async function () {
@@ -236,6 +306,130 @@ function configureDiscreetLogin() {
     }
     document.getElementById('shadow_popup').style.opacity = '';
     
+    // Password recovery functionality
+    $('#recoverPassword').on('click', async () => {
+        const handle = $('#userHandle').val();
+        if (!handle) {
+            return displayError('请先选择用户或输入用户名');
+        }
+        
+        $('#passwordEntryBlock').hide();
+        $('#passwordRecoveryBlock').show();
+        $('#userHandle').val(handle); // Keep the handle for recovery
+    });
+
+    $('#sendRecovery').on('click', async () => {
+        const handle = $('#userHandle').val();
+        const recoveryCode = $('#recoveryCode').val();
+        const newPassword = $('#newPassword').val();
+
+        if (!handle) {
+            return displayError('用户名不能为空');
+        }
+
+        if (!recoveryCode && !newPassword) {
+            // Step 1: Request recovery code
+            try {
+                const response = await fetch('/api/users/recover-step1', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-Token': csrfToken,
+                    },
+                    body: JSON.stringify({ handle: handle }),
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    return displayError(errorData.error || '发送恢复码失败');
+                }
+
+                // Show success message and update UI
+                $('#recoverMessage').text('恢复码已生成，请输入恢复码和新密码。');
+                displayError('恢复码已生成，请查看下方输入框', 'neutral_good');
+                
+                // Generate and display the recovery code directly in the UI
+                generateAndDisplayRecoveryCode(handle);
+                
+            } catch (error) {
+                console.error('Recovery step 1 failed:', error);
+                displayError('网络错误，请重试');
+            }
+        } else if (recoveryCode && newPassword) {
+            // Step 2: Reset password with recovery code
+            try {
+                const response = await fetch('/api/users/recover-step2', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-Token': csrfToken,
+                    },
+                    body: JSON.stringify({
+                        handle: handle,
+                        code: recoveryCode,
+                        newPassword: newPassword,
+                    }),
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    return displayError(errorData.error || '密码重置失败');
+                }
+
+                displayError('密码重置成功！请使用新密码登录。', 'neutral_good');
+                
+                // Clear recovery form and return to login
+                $('#recoveryCode').val('');
+                $('#newPassword').val('');
+                $('#passwordRecoveryBlock').hide();
+                $('#passwordEntryBlock').show();
+                $('#userPassword').focus();
+                
+            } catch (error) {
+                console.error('Recovery step 2 failed:', error);
+                displayError('网络错误，请重试');
+            }
+        } else {
+            displayError('请输入恢复码和新密码');
+        }
+    });
+
+    $('#cancelRecovery').on('click', () => {
+        $('#passwordRecoveryBlock').hide();
+        $('#passwordEntryBlock').show();
+        $('#recoveryCode').val('');
+        $('#newPassword').val('');
+        $('#recoverMessage').text('点击"发送"按钮生成恢复码。');
+        $('#errorMessage').text('');
+    });
+
+    // Function to generate and display recovery code in UI
+    async function generateAndDisplayRecoveryCode(handle) {
+        try {
+            // Get the recovery code from the server's new endpoint
+            const response = await fetch('/api/users/get-recovery-code', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-Token': csrfToken,
+                },
+                body: JSON.stringify({ handle: handle }),
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                if (data.code) {
+                    // Display the recovery code directly in the UI
+                    $('#recoverMessage').html(`您的恢复码是: <strong style="color: #4CAF50; font-size: 1.2em;">${data.code}</strong><br>请输入此恢复码和新密码来重置密码。`);
+                }
+            }
+        } catch (error) {
+            console.error('Failed to get recovery code:', error);
+            // Fallback to original message
+            $('#recoverMessage').text('恢复码已生成，请输入恢复码和新密码。');
+        }
+    }
+
     $(document).on('keydown', (evt) => {
         if (evt.key === 'Enter' && document.activeElement.tagName === 'INPUT') {
             if ($('#passwordRecoveryBlock').is(':visible')) {
