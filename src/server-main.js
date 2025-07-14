@@ -244,7 +244,17 @@ app.post('/api/ping', (request, response) => {
 
 // File uploads
 const uploadsPath = path.join(cliArgs.dataRoot, UPLOADS_DIRECTORY);
-app.use(multer({ dest: uploadsPath, limits: { fieldSize: 10 * 1024 * 1024 } }).single('avatar'));
+const upload = multer({
+    dest: uploadsPath,
+    limits: {
+        fieldSize: 10 * 1024 * 1024,
+        fileSize: 10 * 1024 * 1024 // 10MB limit for avatars
+    }
+});
+
+
+// Configure multer for different endpoints - moved after other middleware
+// app.use(upload.single('avatar'));
 app.use(multerMonkeyPatch);
 
 app.get('/version', async function (_, response) {

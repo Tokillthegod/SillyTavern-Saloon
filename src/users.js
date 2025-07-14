@@ -11,6 +11,7 @@ import storage from 'node-persist';
 import express from 'express';
 import mime from 'mime-types';
 import archiver from 'archiver';
+import yauzl from 'yauzl';
 import _ from 'lodash';
 import { sync as writeFileAtomicSync } from 'write-file-atomic';
 
@@ -1014,6 +1015,124 @@ export async function createBackupArchive(handle, response) {
     // Append files from a sub-directory, putting its contents at the root of archive
     archive.directory(directories.root, false);
     archive.finalize();
+}
+
+/**
+ * Extracts a zip file using yauzl.
+ * @param {string} zipPath Path to the zip file
+ * @param {string} extractPath Path to extract to
+ * @returns {Promise<void>}
+ */
+function extractZip(zipPath, extractPath) {
+    return new Promise((resolve, reject) => {
+        yauzl.open(zipPath, { lazyEntries: true }, (err, zipfile) => {
+            if (err) return reject(err);
+
+            zipfile.readEntry();
+            zipfile.on('entry', (entry) => {
+                if (/\/$/.test(entry.fileName)) {
+                    // Directory entry
+                    const dirPath = path.join(extractPath, entry.fileName);
+                    fs.mkdirSync(dirPath, { recursive: true });
+                    zipfile.readEntry();
+                } else {
+                    // File entry
+                    zipfile.openReadStream(entry, (err, readStream) => {
+                        if (err) return reject(err);
+
+                        const filePath = path.join(extractPath, entry.fileName);
+                        const dirPath = path.dirname(filePath);
+                        fs.mkdirSync(dirPath, { recursive: true });
+
+                        const writeStream = fs.createWriteStream(filePath);
+                        readStream.pipe(writeStream);
+                        writeStream.on('close', () => zipfile.readEntry());
+                        writeStream.on('error', reject);
+                    });
+                }
+            });
+
+            zipfile.on('end', resolve);
+            zipfile.on('error', reject);
+        });
+    });
+}
+
+/**
+ * Restores user data from a backup archive.
+ * @param {string} handle User handle
+ * @param {string} backupFilePath Path to the backup zip file
+ * @returns {Promise<void>} Promise that resolves when the restore is complete
+ */
+export async function restoreBackupArchive(handle, backupFilePath) {
+    const directories = getUserDirectories(handle);
+    const tempDir = path.join(os.tmpdir(), `restore-${handle}-${Date.now()}`);
+
+    try {
+        console.info('Restore backup requested for', handle);
+
+        // Create temporary directory for extraction
+        if (!fs.existsSync(tempDir)) {
+            fs.mkdirSync(tempDir, { recursive: true });
+        }
+
+        // Extract the backup archive to temporary directory
+        await extractZip(backupFilePath, tempDir);
+
+        // Create backup of current data before restore
+        const currentDate = new Date().toISOString().split('T')[0];
+        const backupDir = path.join(directories.backups, '_restore_backup', currentDate);
+        if (!fs.existsSync(backupDir)) {
+            fs.mkdirSync(backupDir, { recursive: true });
+        }
+
+        // Backup current user directory
+        if (fs.existsSync(directories.root)) {
+            // Create a temporary backup directory outside the user's root to avoid recursion
+            const tempBackupDir = path.join(os.tmpdir(), `temp-backup-${handle}-${Date.now()}`);
+            try {
+                // Copy the entire user directory to the temporary location
+                fs.cpSync(directories.root, tempBackupDir, { recursive: true, force: true });
+
+                // Now, move this temporary backup to its final destination inside the user's backup folder
+                const currentBackupPath = path.join(backupDir, `${handle}-before-restore-${Date.now()}`);
+                fs.cpSync(tempBackupDir, currentBackupPath, { recursive: true });
+                fs.rmSync(tempBackupDir, { recursive: true, force: true });
+
+                console.info('Current data backed up to:', currentBackupPath);
+            } catch (error) {
+                // Ensure temp directory is cleaned up on error
+                if (fs.existsSync(tempBackupDir)) {
+                    fs.rmSync(tempBackupDir, { recursive: true, force: true });
+                }
+                // Re-throw the error to be caught by the outer try-catch
+                throw error;
+            }
+        }
+
+        // Remove current user directory
+        if (fs.existsSync(directories.root)) {
+            fs.rmSync(directories.root, { recursive: true, force: true });
+        }
+
+        // Restore from backup
+        fs.cpSync(tempDir, directories.root, { recursive: true, force: true });
+
+        console.info('Backup restored successfully for', handle);
+    } catch (error) {
+        console.error('Error restoring backup for', handle, ':', error);
+        throw new Error(`Failed to restore backup: ${error.message}`);
+    } finally {
+        // Clean up temporary directory
+        if (fs.existsSync(tempDir)) {
+            fs.rmSync(tempDir, { recursive: true, force: true });
+        }
+
+        // Clean up uploaded file
+        if (fs.existsSync(backupFilePath)) {
+            fs.rmSync(backupFilePath, { force: true });
+        }
+    }
 }
 
 /**

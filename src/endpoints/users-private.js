@@ -4,13 +4,35 @@ import crypto from 'node:crypto';
 
 import storage from 'node-persist';
 import express from 'express';
+import multer from 'multer';
 
-import { getUserAvatar, toKey, getPasswordHash, getPasswordSalt, createBackupArchive, ensurePublicDirectoriesExist, toAvatarKey } from '../users.js';
-import { SETTINGS_FILE } from '../constants.js';
+import { getUserAvatar, toKey, getPasswordHash, getPasswordSalt, createBackupArchive, restoreBackupArchive, ensurePublicDirectoriesExist, toAvatarKey } from '../users.js';
+import { SETTINGS_FILE, UPLOADS_DIRECTORY } from '../constants.js';
 import { checkForNewContent, CONTENT_TYPES } from './content-manager.js';
 import { color, Cache } from '../util.js';
 
 const RESET_CACHE = new Cache(5 * 60 * 1000);
+
+// Configure multer for backup file uploads
+const uploadsPath = path.join(globalThis.DATA_ROOT, UPLOADS_DIRECTORY);
+const backupUpload = multer({ 
+    dest: uploadsPath, 
+    limits: { 
+        fieldSize: 50 * 1024 * 1024, // 50MB field size limit
+        fileSize: 500 * 1024 * 1024, // 500MB file size limit
+        files: 1, // Only allow 1 file
+        fields: 10, // Allow multiple fields
+        parts: 100 // Allow more parts
+    },
+    fileFilter: (req, file, cb) => {
+        // Accept zip files
+        if (file.mimetype === 'application/zip' || file.originalname.endsWith('.zip')) {
+            cb(null, true);
+        } else {
+            cb(new Error('Only ZIP files are allowed'), false);
+        }
+    }
+});
 
 export const router = express.Router();
 
@@ -155,6 +177,53 @@ router.post('/backup', async (request, response) => {
         console.error('Backup failed', error);
         return response.sendStatus(500);
     }
+});
+
+router.post('/restore-backup', (request, response) => {
+    // Handle multer upload with custom error handling
+    backupUpload.single('file')(request, response, async (err) => {
+        try {
+            if (err) {
+                console.error('Multer error:', err);
+                if (err.code === 'LIMIT_FILE_SIZE') {
+                    return response.status(400).json({ error: 'File too large. Maximum size is 500MB.' });
+                } else if (err.code === 'LIMIT_UNEXPECTED_FILE') {
+                    return response.status(400).json({ error: 'Unexpected file field.' });
+                } else {
+                    return response.status(400).json({ error: err.message || 'File upload error' });
+                }
+            }
+
+            console.log('Restore backup request received');
+            console.log('Request body:', request.body);
+            console.log('Request file:', request.file ? { 
+                filename: request.file.filename, 
+                originalname: request.file.originalname,
+                size: request.file.size, 
+                mimetype: request.file.mimetype 
+            } : 'No file');
+
+            const handle = request.body.handle || request.user.profile.handle;
+
+            if (handle !== request.user.profile.handle && !request.user.profile.admin) {
+                console.error('Restore backup failed: Unauthorized');
+                return response.status(403).json({ error: 'Unauthorized' });
+            }
+
+            if (!request.file) {
+                console.warn('Restore backup failed: No file uploaded');
+                return response.status(400).json({ error: 'No backup file provided' });
+            }
+
+            console.log('Starting backup restore for handle:', handle);
+            await restoreBackupArchive(handle, request.file.path);
+            console.log('Backup restore completed successfully');
+            return response.sendStatus(204);
+        } catch (error) {
+            console.error('Restore backup failed', error);
+            return response.status(500).json({ error: error.message || 'Failed to restore backup' });
+        }
+    });
 });
 
 router.post('/reset-settings', async (request, response) => {

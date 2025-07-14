@@ -283,6 +283,75 @@ async function backupUserData(handle, callback) {
 }
 
 /**
+ * Restore a user's data from a backup file.
+ * @param {string} handle Handle of the user to restore
+ * @param {File} backupFile Backup file to restore from
+ * @param {function} callback Success callback
+ * @returns {Promise<void>}
+ */
+async function restoreUserData(handle, backupFile, callback) {
+    try {
+        const confirm = await callGenericPopup(
+            '您确定要从此备份中恢复吗？这将替换所有当前用户数据且无法撤销。您当前的数据将在恢复前进行备份。',
+            POPUP_TYPE.CONFIRM,
+            '',
+            { okButton: 'Restore', cancelButton: 'Cancel', wide: false, large: false },
+        );
+
+        if (confirm !== POPUP_RESULT.AFFIRMATIVE) {
+            throw new Error('Restore backup cancelled');
+        }
+
+        toastr.info('Please wait while the backup is being restored...', 'Restore in Progress');
+
+        const formData = new FormData();
+        formData.append('file', backupFile);
+        formData.append('handle', handle);
+
+        // Only include CSRF token for FormData uploads
+        const headers = {};
+        const requestHeaders = getRequestHeaders();
+        if (requestHeaders['X-CSRF-Token']) {
+            headers['X-CSRF-Token'] = requestHeaders['X-CSRF-Token'];
+        }
+
+        const response = await fetch('/api/users/restore-backup', {
+            method: 'POST',
+            headers: headers,
+            body: formData,
+        });
+
+        if (!response.ok) {
+            let errorMessage = 'Unknown error';
+            try {
+                const data = await response.json();
+                errorMessage = data.error || 'Unknown error';
+            } catch (e) {
+                // If response is not JSON, try to get text
+                try {
+                    errorMessage = await response.text() || `HTTP ${response.status}`;
+                } catch (e2) {
+                    errorMessage = `HTTP ${response.status}`;
+                }
+            }
+            toastr.error(errorMessage, 'Failed to restore backup');
+            throw new Error('Failed to restore backup: ' + errorMessage);
+        }
+
+        toastr.success('Backup restored successfully. The page will reload to apply changes.', 'Backup Restored');
+        setTimeout(() => {
+            location.reload();
+        }, 2000);
+        callback();
+    } catch (error) {
+        console.error('Error restoring user data:', error);
+        if (error.message !== 'Restore backup cancelled') {
+            toastr.error(error.message || 'Unknown error', 'Failed to restore backup');
+        }
+    }
+}
+
+/**
  * Shows a popup to change a user's password.
  * @param {string} handle User handle
  * @param {function} callback Success callback
@@ -695,6 +764,29 @@ async function openUserProfile() {
         backupUserData(currentUser.handle, () => {
             $(this).removeClass('disabled');
         });
+    });
+    template.find('.userRestoreBackupButton').on('click', () => template.find('.backupUpload').trigger('click'));
+    template.find('.backupUpload').on('change', async function () {
+        if (!(this instanceof HTMLInputElement)) {
+            return;
+        }
+
+        const file = this.files[0];
+        if (!file) {
+            return;
+        }
+
+        if (!file.name.endsWith('.zip')) {
+            toastr.error('Please select a valid backup file (.zip)', 'Invalid File');
+            return;
+        }
+
+        await restoreUserData(currentUser.handle, file, () => {
+            // Callback handled in restoreUserData function
+        });
+
+        // Clear the file input
+        this.value = '';
     });
     template.find('.userResetSettingsButton').on('click', () => resetSettings(currentUser.handle, () => location.reload()));
     template.find('.userResetAllButton').on('click', () => resetEverything(() => location.reload()));
