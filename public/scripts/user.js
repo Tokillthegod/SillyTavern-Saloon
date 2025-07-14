@@ -531,6 +531,90 @@ async function changeName(handle, name, callback) {
 }
 
 /**
+ * Set security question for password recovery.
+ * @param {string} handle User handle
+ * @param {function} callback Success callback
+ */
+async function setSecurityQuestion(handle, callback) {
+    try {
+        // Get current security question status
+        const statusResponse = await fetch('/api/users/get-security-question', {
+            headers: getRequestHeaders(),
+        });
+
+        let currentSecurityQuestion = null;
+        if (statusResponse.ok) {
+            const statusData = await statusResponse.json();
+            currentSecurityQuestion = statusData.securityQuestion;
+        }
+
+        const template = $(await renderTemplateAsync('setSecurityQuestion'));
+        
+        // Show current security question if exists
+        if (currentSecurityQuestion) {
+            template.find('.currentSecurityQuestionBlock').show();
+            template.find('.currentSecurityQuestion').text(currentSecurityQuestion);
+            template.find('#securityQuestionSelect').val(currentSecurityQuestion);
+        }
+
+        let securityQuestion = '';
+        let securityAnswer = '';
+        let password = '';
+
+        template.find('#securityQuestionSelect').on('change', function () {
+            securityQuestion = String($(this).val());
+        });
+        template.find('#securityAnswerInput').on('input', function () {
+            securityAnswer = String($(this).val());
+        });
+        template.find('#passwordConfirm').on('input', function () {
+            password = String($(this).val());
+        });
+
+        const result = await callGenericPopup(template, POPUP_TYPE.CONFIRM, '', { 
+            okButton: 'Set Security Question', 
+            cancelButton: 'Cancel', 
+            wide: false, 
+            large: false 
+        });
+
+        if (result === POPUP_RESULT.CANCELLED || result === POPUP_RESULT.NEGATIVE) {
+            throw new Error('Set security question cancelled');
+        }
+
+        if (!securityQuestion || !securityAnswer || !password) {
+            toastr.error('Please fill in all fields', 'Failed to set security question');
+            throw new Error('Missing required fields');
+        }
+
+        const response = await fetch('/api/users/set-security-question', {
+            method: 'POST',
+            headers: getRequestHeaders(),
+            body: JSON.stringify({ 
+                securityQuestion, 
+                securityAnswer, 
+                password 
+            }),
+        });
+
+        if (!response.ok) {
+            const data = await response.json();
+            toastr.error(data.error || 'Unknown error', 'Failed to set security question');
+            throw new Error('Failed to set security question');
+        }
+
+        toastr.success('Security question set successfully', 'Security Question Set');
+        callback();
+
+    } catch (error) {
+        console.error('Error setting security question:', error);
+        if (error.message !== 'Set security question cancelled') {
+            // Error already shown in toastr above
+        }
+    }
+}
+
+/**
  * Restore a settings snapshot.
  * @param {string} name Snapshot name
  * @param {function} callback Success callback
@@ -749,6 +833,22 @@ async function openUserProfile() {
     template.find('.userCreated').text(new Date(currentUser.created).toLocaleString());
     template.find('.hasPassword').toggle(currentUser.password);
     template.find('.noPassword').toggle(!currentUser.password);
+
+    // Check and display security question status
+    try {
+        const securityResponse = await fetch('/api/users/get-security-question', {
+            headers: getRequestHeaders(),
+        });
+        if (securityResponse.ok) {
+            const securityData = await securityResponse.json();
+            template.find('.hasSecurityQuestion').toggle(securityData.hasSecurityQuestion);
+            template.find('.noSecurityQuestion').toggle(!securityData.hasSecurityQuestion);
+        }
+    } catch (error) {
+        console.error('Error getting security question status:', error);
+        template.find('.hasSecurityQuestion').hide();
+        template.find('.noSecurityQuestion').show();
+    }
     template.find('.userSettingsSnapshotsButton').on('click', () => viewSettingsSnapshots());
     template.find('.userChangeNameButton').on('click', async () => changeName(currentUser.handle, currentUser.name, async () => {
         await getCurrentUser();
@@ -758,6 +858,21 @@ async function openUserProfile() {
         await getCurrentUser();
         template.find('.hasPassword').toggle(currentUser.password);
         template.find('.noPassword').toggle(!currentUser.password);
+    }));
+    template.find('.userSetSecurityQuestionButton').on('click', () => setSecurityQuestion(currentUser.handle, async () => {
+        // Refresh security question status
+        try {
+            const securityResponse = await fetch('/api/users/get-security-question', {
+                headers: getRequestHeaders(),
+            });
+            if (securityResponse.ok) {
+                const securityData = await securityResponse.json();
+                template.find('.hasSecurityQuestion').toggle(securityData.hasSecurityQuestion);
+                template.find('.noSecurityQuestion').toggle(!securityData.hasSecurityQuestion);
+            }
+        } catch (error) {
+            console.error('Error refreshing security question status:', error);
+        }
     }));
     template.find('.userBackupButton').on('click', function () {
         $(this).addClass('disabled');

@@ -1,0 +1,30 @@
+<div class="flex-container flexFlowColumn justifyLeft flexGap10">
+    <h3>Set Security Question</h3>
+    <p>Security questions help you recover your password if you forget it. Choose a question and provide an answer that only you would know.</p>
+    
+    <div class="flex-container flexFlowColumn flexGap10">
+        <label for="securityQuestionSelect">Choose a security question:</label>
+        <select id="securityQuestionSelect" class="text_pole" required>
+            <option value="">Please select a security question</option>
+            <option value="What is your mother's maiden name?">What is your mother's maiden name?</option>
+            <option value="What was the name of your first pet?">What was the name of your first pet?</option>
+            <option value="In what city were you born?">In what city were you born?</option>
+            <option value="What was the name of your favorite teacher?">What was the name of your favorite teacher?</option>
+            <option value="What was the name of your elementary school?">What was the name of your elementary school?</option>
+            <option value="What is the name of your best friend?">What is the name of your best friend?</option>
+        </select>
+        
+        <label for="securityAnswerInput">Your answer:</label>
+        <input id="securityAnswerInput" class="text_pole" type="text" placeholder="Enter your answer" required>
+        
+        <div class="currentSecurityQuestionBlock" style="display: none;">
+            <h4>Current Security Question:</h4>
+            <p class="currentSecurityQuestion" style="font-style: italic; color: #666;"></p>
+        </div>
+        
+        <div class="passwordConfirmBlock">
+            <label for="passwordConfirm">Confirm your password:</label>
+            <input id="passwordConfirm" class="text_pole" type="password" placeholder="Enter your current password" required>
+        </div>
+    </div>
+</div>

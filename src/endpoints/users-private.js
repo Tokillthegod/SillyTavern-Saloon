@@ -322,3 +322,50 @@ router.post('/reset-step2', async (request, response) => {
         return response.sendStatus(500);
     }
 });
+
+router.post('/set-security-question', async (request, response) => {
+    try {
+        if (!request.body.securityQuestion || !request.body.securityAnswer || !request.body.password) {
+            console.warn('Set security question failed: Missing required fields');
+            return response.status(400).json({ error: 'Missing required fields' });
+        }
+
+        // Verify current password
+        if (request.user.profile.password && request.user.profile.password !== getPasswordHash(request.body.password, request.user.profile.salt)) {
+            console.warn('Set security question failed: Incorrect password');
+            return response.status(400).json({ error: 'Incorrect password' });
+        }
+
+        // Hash the security answer
+        const securityAnswer = getPasswordHash(request.body.securityAnswer.toLowerCase().trim(), request.user.profile.salt);
+
+        // Update user profile
+        const updatedUser = {
+            ...request.user.profile,
+            securityQuestion: request.body.securityQuestion,
+            securityAnswer: securityAnswer,
+        };
+
+        await storage.setItem(toKey(request.user.profile.handle), updatedUser);
+        console.info('Security question set for user:', request.user.profile.handle);
+        
+        return response.sendStatus(204);
+    } catch (error) {
+        console.error('Set security question failed:', error);
+        return response.sendStatus(500);
+    }
+});
+
+router.get('/get-security-question', async (request, response) => {
+    try {
+        const user = request.user.profile;
+        
+        return response.json({
+            hasSecurityQuestion: !!user.securityQuestion,
+            securityQuestion: user.securityQuestion || null,
+        });
+    } catch (error) {
+        console.error('Get security question failed:', error);
+        return response.sendStatus(500);
+    }
+});
