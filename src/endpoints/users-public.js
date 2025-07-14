@@ -127,12 +127,12 @@ router.post('/recover-step1', async (request, response) => {
             return response.status(403).json({ error: 'User is disabled' });
         }
 
-        const mfaCode = String(crypto.randomInt(1000, 9999));
-        console.log();
-        console.log(color.blue(`${user.name}, your password recovery code is: `) + color.magenta(mfaCode));
-        console.log();
-        MFA_CACHE.set(user.handle, mfaCode);
-        return response.sendStatus(204);
+        // Return security question instead of generating recovery code
+        if (user.securityQuestion) {
+            return response.json({ securityQuestion: user.securityQuestion });
+        } else {
+            return response.status(400).json({ error: 'No security question set for this user' });
+        }
     } catch (error) {
         if (error instanceof RateLimiterRes) {
             console.error('Recover step 1 failed: Rate limited from', getIpAddress(request));
@@ -146,7 +146,7 @@ router.post('/recover-step1', async (request, response) => {
 
 router.post('/recover-step2', async (request, response) => {
     try {
-        if (!request.body.handle || !request.body.code) {
+        if (!request.body.handle || !request.body.securityAnswer) {
             console.warn('Recover step 2 failed: Missing required fields');
             return response.status(400).json({ error: 'Missing required fields' });
         }
@@ -165,11 +165,59 @@ router.post('/recover-step2', async (request, response) => {
             return response.status(403).json({ error: 'User is disabled' });
         }
 
+        // Verify security answer
+        const hashedAnswer = getPasswordHash(request.body.securityAnswer.toLowerCase().trim(), user.salt);
+        if (!user.securityAnswer || hashedAnswer !== user.securityAnswer) {
+            await recoverLimiter.consume(ip);
+            console.warn('Recover step 2 failed: Incorrect security answer');
+            return response.status(403).json({ error: 'Incorrect security answer' });
+        }
+
+        // Generate and return recovery code
+        const mfaCode = String(crypto.randomInt(1000, 9999));
+        console.log();
+        console.log(color.blue(`${user.name}, your password recovery code is: `) + color.magenta(mfaCode));
+        console.log();
+        MFA_CACHE.set(user.handle, mfaCode);
+        
+        return response.json({ recoveryCode: mfaCode });
+    } catch (error) {
+        if (error instanceof RateLimiterRes) {
+            console.error('Recover step 2 failed: Rate limited from', getIpAddress(request));
+            return response.status(429).send({ error: 'Too many attempts. Try again later or contact your admin.' });
+        }
+
+        console.error('Recover step 2 failed:', error);
+        return response.sendStatus(500);
+    }
+});
+
+router.post('/recover-step3', async (request, response) => {
+    try {
+        if (!request.body.handle || !request.body.code) {
+            console.warn('Recover step 3 failed: Missing required fields');
+            return response.status(400).json({ error: 'Missing required fields' });
+        }
+
+        /** @type {import('../users.js').User} */
+        const user = await storage.getItem(toKey(request.body.handle));
+        const ip = getIpAddress(request);
+
+        if (!user) {
+            console.error('Recover step 3 failed: User', request.body.handle, 'not found');
+            return response.status(404).json({ error: 'User not found' });
+        }
+
+        if (!user.enabled) {
+            console.warn('Recover step 3 failed: User', user.handle, 'is disabled');
+            return response.status(403).json({ error: 'User is disabled' });
+        }
+
         const mfaCode = MFA_CACHE.get(user.handle);
 
         if (request.body.code !== mfaCode) {
             await recoverLimiter.consume(ip);
-            console.warn('Recover step 2 failed: Incorrect code');
+            console.warn('Recover step 3 failed: Incorrect code');
             return response.status(403).json({ error: 'Incorrect code' });
         }
 
@@ -189,11 +237,11 @@ router.post('/recover-step2', async (request, response) => {
         return response.sendStatus(204);
     } catch (error) {
         if (error instanceof RateLimiterRes) {
-            console.error('Recover step 2 failed: Rate limited from', getIpAddress(request));
+            console.error('Recover step 3 failed: Rate limited from', getIpAddress(request));
             return response.status(429).send({ error: 'Too many attempts. Try again later or contact your admin.' });
         }
 
-        console.error('Recover step 2 failed:', error);
+        console.error('Recover step 3 failed:', error);
         return response.sendStatus(500);
     }
 });
@@ -233,7 +281,7 @@ router.post('/get-recovery-code', async (request, response) => {
 
 router.post('/register', async (request, response) => {
     try {
-        if (!request.body.handle || !request.body.name || !request.body.password) {
+        if (!request.body.handle || !request.body.name || !request.body.password || !request.body.securityQuestion || !request.body.securityAnswer) {
             console.warn('Register failed: Missing required fields');
             return response.status(400).json({ error: 'Missing required fields' });
         }
@@ -265,6 +313,7 @@ router.post('/register', async (request, response) => {
 
         const salt = getPasswordSalt();
         const password = getPasswordHash(request.body.password, salt);
+        const securityAnswer = getPasswordHash(request.body.securityAnswer.toLowerCase().trim(), salt);
 
         const newUser = {
             handle: handle,
@@ -274,6 +323,8 @@ router.post('/register', async (request, response) => {
             salt: salt,
             admin: false,
             enabled: true,
+            securityQuestion: request.body.securityQuestion,
+            securityAnswer: securityAnswer,
         };
 
         await storage.setItem(toKey(handle), newUser);

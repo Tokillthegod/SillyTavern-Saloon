@@ -49,7 +49,7 @@ async function getUserList() {
  * @param {string} password Password
  * @param {string} confirmPassword Confirm password
  */
-async function registerUser(name, handle, password, confirmPassword) {
+async function registerUser(name, handle, password, confirmPassword, securityQuestion, securityAnswer) {
     const response = await fetch('/api/users/register', {
         method: 'POST',
         headers: {
@@ -61,6 +61,8 @@ async function registerUser(name, handle, password, confirmPassword) {
             handle: handle,
             password: password,
             confirmPassword: confirmPassword,
+            securityQuestion: securityQuestion,
+            securityAnswer: securityAnswer,
         }),
     });
 
@@ -77,6 +79,8 @@ async function registerUser(name, handle, password, confirmPassword) {
     $('#registerHandle').val('');
     $('#registerPassword').val('');
     $('#registerConfirmPassword').val('');
+    $('#registerSecurityQuestion').val('');
+    $('#registerSecurityAnswer').val('');
 
     // Switch back to appropriate login view
     $('#registerBlock').hide();
@@ -148,8 +152,10 @@ function configureNormalLogin(userList) {
         const handle = String($('#registerHandle').val()).trim();
         const password = String($('#registerPassword').val());
         const confirmPassword = String($('#registerConfirmPassword').val());
+        const securityQuestion = String($('#registerSecurityQuestion').val());
+        const securityAnswer = String($('#registerSecurityAnswer').val()).trim();
 
-        if (!name || !handle || !password || !confirmPassword) {
+        if (!name || !handle || !password || !confirmPassword || !securityQuestion || !securityAnswer) {
             return displayError('请填写所有字段');
         }
 
@@ -161,7 +167,7 @@ function configureNormalLogin(userList) {
             return displayError('用户名只能包含小写字母、数字和连字符');
         }
 
-        await registerUser(name, handle, password, confirmPassword);
+        await registerUser(name, handle, password, confirmPassword, securityQuestion, securityAnswer);
     });
 
     $('#cancelRegister').off('click').on('click', () => {
@@ -173,6 +179,8 @@ function configureNormalLogin(userList) {
         $('#registerHandle').val('');
         $('#registerPassword').val('');
         $('#registerConfirmPassword').val('');
+        $('#registerSecurityQuestion').val('');
+        $('#registerSecurityAnswer').val('');
     });
 
     // Add login button functionality for discreet mode
@@ -232,8 +240,10 @@ function configureDiscreetLogin() {
         const handle = String($('#registerHandle').val()).trim();
         const password = String($('#registerPassword').val());
         const confirmPassword = String($('#registerConfirmPassword').val());
+        const securityQuestion = String($('#registerSecurityQuestion').val());
+        const securityAnswer = String($('#registerSecurityAnswer').val()).trim();
 
-        if (!name || !handle || !password || !confirmPassword) {
+        if (!name || !handle || !password || !confirmPassword || !securityQuestion || !securityAnswer) {
             return displayError('请填写所有字段');
         }
 
@@ -245,7 +255,7 @@ function configureDiscreetLogin() {
             return displayError('用户名只能包含小写字母、数字和连字符');
         }
 
-        await registerUser(name, handle, password, confirmPassword);
+        await registerUser(name, handle, password, confirmPassword, securityQuestion, securityAnswer);
     });
 
     $('#cancelRegister').off('click').on('click', () => {
@@ -257,6 +267,8 @@ function configureDiscreetLogin() {
         $('#registerHandle').val('');
         $('#registerPassword').val('');
         $('#registerConfirmPassword').val('');
+        $('#registerSecurityQuestion').val('');
+        $('#registerSecurityAnswer').val('');
     });
 
     // Add login button functionality
@@ -318,17 +330,18 @@ function configureDiscreetLogin() {
         $('#userHandle').val(handle); // Keep the handle for recovery
     });
 
+    let recoveryStep = 1;
+    let currentSecurityQuestion = '';
+
     $('#sendRecovery').on('click', async () => {
         const handle = $('#userHandle').val();
-        const recoveryCode = $('#recoveryCode').val();
-        const newPassword = $('#newPassword').val();
 
         if (!handle) {
             return displayError('用户名不能为空');
         }
 
-        if (!recoveryCode && !newPassword) {
-            // Step 1: Request recovery code
+        if (recoveryStep === 1) {
+            // Step 1: Get security question
             try {
                 const response = await fetch('/api/users/recover-step1', {
                     method: 'POST',
@@ -341,24 +354,73 @@ function configureDiscreetLogin() {
 
                 if (!response.ok) {
                     const errorData = await response.json();
-                    return displayError(errorData.error || '发送恢复码失败');
+                    return displayError(errorData.error || '获取安全问题失败');
                 }
 
-                // Show success message and update UI
-                $('#recoverMessage').text('恢复码已生成，请输入恢复码和新密码。');
-                displayError('恢复码已生成，请查看下方输入框', 'neutral_good');
+                const data = await response.json();
+                currentSecurityQuestion = data.securityQuestion;
                 
-                // Generate and display the recovery code directly in the UI
-                generateAndDisplayRecoveryCode(handle);
+                // Show security question and answer input
+                $('#securityQuestionDisplay').text(currentSecurityQuestion).show();
+                $('#securityAnswerInput').show();
+                $('#sendRecovery').text('验证答案');
+                $('#recoverMessage').text('请回答以下安全问题：');
+                recoveryStep = 2;
                 
             } catch (error) {
                 console.error('Recovery step 1 failed:', error);
                 displayError('网络错误，请重试');
             }
-        } else if (recoveryCode && newPassword) {
-            // Step 2: Reset password with recovery code
+        } else if (recoveryStep === 2) {
+            // Step 2: Verify security answer and get recovery code
+            const securityAnswer = $('#securityAnswerInput').val();
+            
+            if (!securityAnswer) {
+                return displayError('请输入安全问题答案');
+            }
+
             try {
                 const response = await fetch('/api/users/recover-step2', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-Token': csrfToken,
+                    },
+                    body: JSON.stringify({
+                        handle: handle,
+                        securityAnswer: securityAnswer,
+                    }),
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    return displayError(errorData.error || '安全问题答案错误');
+                }
+
+                const data = await response.json();
+                
+                // Show recovery code and password inputs
+                $('#recoveryCode').show().val(data.recoveryCode);
+                $('#newPassword').show();
+                $('#sendRecovery').text('重置密码');
+                $('#recoverMessage').html(`验证成功！您的恢复码是: <strong style="color: #4CAF50;">${data.recoveryCode}</strong><br>请输入新密码完成重置。`);
+                recoveryStep = 3;
+                
+            } catch (error) {
+                console.error('Recovery step 2 failed:', error);
+                displayError('网络错误，请重试');
+            }
+        } else if (recoveryStep === 3) {
+            // Step 3: Reset password with recovery code
+            const recoveryCode = $('#recoveryCode').val();
+            const newPassword = $('#newPassword').val();
+            
+            if (!recoveryCode || !newPassword) {
+                return displayError('请输入恢复码和新密码');
+            }
+
+            try {
+                const response = await fetch('/api/users/recover-step3', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -378,57 +440,35 @@ function configureDiscreetLogin() {
 
                 displayError('密码重置成功！请使用新密码登录。', 'neutral_good');
                 
-                // Clear recovery form and return to login
-                $('#recoveryCode').val('');
-                $('#newPassword').val('');
-                $('#passwordRecoveryBlock').hide();
-                $('#passwordEntryBlock').show();
-                $('#userPassword').focus();
+                // Reset recovery form and return to login
+                resetRecoveryForm();
                 
             } catch (error) {
-                console.error('Recovery step 2 failed:', error);
+                console.error('Recovery step 3 failed:', error);
                 displayError('网络错误，请重试');
             }
-        } else {
-            displayError('请输入恢复码和新密码');
         }
     });
 
-    $('#cancelRecovery').on('click', () => {
+    function resetRecoveryForm() {
+        recoveryStep = 1;
+        currentSecurityQuestion = '';
+        $('#securityQuestionDisplay').hide().text('');
+        $('#securityAnswerInput').hide().val('');
+        $('#recoveryCode').hide().val('');
+        $('#newPassword').hide().val('');
+        $('#sendRecovery').text('获取安全问题');
+        $('#recoverMessage').text('请回答安全问题以获取恢复码。');
         $('#passwordRecoveryBlock').hide();
         $('#passwordEntryBlock').show();
-        $('#recoveryCode').val('');
-        $('#newPassword').val('');
-        $('#recoverMessage').text('点击"发送"按钮生成恢复码。');
+        $('#userPassword').focus();
+    }
+
+    $('#cancelRecovery').on('click', () => {
+        resetRecoveryForm();
         $('#errorMessage').text('');
     });
 
-    // Function to generate and display recovery code in UI
-    async function generateAndDisplayRecoveryCode(handle) {
-        try {
-            // Get the recovery code from the server's new endpoint
-            const response = await fetch('/api/users/get-recovery-code', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-Token': csrfToken,
-                },
-                body: JSON.stringify({ handle: handle }),
-            });
-
-            if (response.ok) {
-                const data = await response.json();
-                if (data.code) {
-                    // Display the recovery code directly in the UI
-                    $('#recoverMessage').html(`您的恢复码是: <strong style="color: #4CAF50; font-size: 1.2em;">${data.code}</strong><br>请输入此恢复码和新密码来重置密码。`);
-                }
-            }
-        } catch (error) {
-            console.error('Failed to get recovery code:', error);
-            // Fallback to original message
-            $('#recoverMessage').text('恢复码已生成，请输入恢复码和新密码。');
-        }
-    }
 
     $(document).on('keydown', (evt) => {
         if (evt.key === 'Enter' && document.activeElement.tagName === 'INPUT') {

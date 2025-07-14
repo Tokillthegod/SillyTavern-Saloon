@@ -53,6 +53,8 @@ const STORAGE_KEYS = {
  * @property {string} salt - Salt used for hashing the password
  * @property {boolean} enabled - Whether the user is enabled
  * @property {boolean} admin - Whether the user is an admin (can manage other users)
+ * @property {string} [securityQuestion] - The user's security question
+ * @property {string} [securityAnswer] - Hash of the user's security answer
  */
 
 /**

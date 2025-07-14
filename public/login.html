@@ -84,12 +84,14 @@
                             </div>
                             <div id="passwordRecoveryBlock" style="display:none;" class="flex-container flexFlowColumn alignItemsCenter">
                                 <div id="recoverMessage">
-                                    点击"发送"按钮生成恢复码。
+                                    请回答安全问题以获取恢复码。
                                 </div>
-                                <input id="recoveryCode" class="text_pole" type="text" placeholder="恢复码">
-                                <input id="newPassword" class="text_pole" type="password" placeholder="新密码" autocomplete="new-password">
+                                <div id="securityQuestionDisplay" style="display:none; margin: 10px 0; font-weight: bold;"></div>
+                                <input id="securityAnswerInput" class="text_pole" type="text" placeholder="安全问题答案" style="display:none;">
+                                <input id="recoveryCode" class="text_pole" type="text" placeholder="恢复码" style="display:none;">
+                                <input id="newPassword" class="text_pole" type="password" placeholder="新密码" autocomplete="new-password" style="display:none;">
                                 <div class="flex-container flexGap10">
-                                    <div id="sendRecovery" class="menu_button">发送</div>
+                                    <div id="sendRecovery" class="menu_button">获取安全问题</div>
                                     <div id="cancelRecovery" class="menu_button">取消</div>
                                 </div>
                             </div>
@@ -99,6 +101,16 @@
                                 <input id="registerHandle" class="text_pole" type="text" placeholder="用户名（仅限小写字母、数字、连字符）" autocomplete="username" pattern="[a-z0-9-]+" required>
                                 <input id="registerPassword" class="text_pole" type="password" placeholder="密码" autocomplete="new-password" required>
                                 <input id="registerConfirmPassword" class="text_pole" type="password" placeholder="确认密码" autocomplete="new-password" required>
+                                <select id="registerSecurityQuestion" class="text_pole" required>
+                                    <option value="">请选择安全问题</option>
+                                    <option value="您母亲的姓名是什么？">您母亲的姓名是什么？</option>
+                                    <option value="您的第一只宠物叫什么名字？">您的第一只宠物叫什么名字？</option>
+                                    <option value="您出生的城市是哪里？">您出生的城市是哪里？</option>
+                                    <option value="您最喜欢的老师的姓名是什么？">您最喜欢的老师的姓名是什么？</option>
+                                    <option value="您小学的名称是什么？">您小学的名称是什么？</option>
+                                    <option value="您最好朋友的名字是什么？">您最好朋友的名字是什么？</option>
+                                </select>
+                                <input id="registerSecurityAnswer" class="text_pole" type="text" placeholder="安全问题答案" required>
                                 <div class="flex-container flexGap10">
                                     <div id="registerButton" class="menu_button">建立账户</div>
                                     <div id="cancelRegister" class="menu_button">取消</div>
