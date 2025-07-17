@@ -254,7 +254,7 @@ const upload = multer({
 
 
 // Configure multer for different endpoints - moved after other middleware
-// app.use(upload.single('avatar'));
+app.use(upload.single('avatar'));
 app.use(multerMonkeyPatch);
 
 app.get('/version', async function (_, response) {
