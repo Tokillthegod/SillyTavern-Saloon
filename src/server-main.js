@@ -254,7 +254,14 @@ const upload = multer({
 
 
 // Configure multer for different endpoints - moved after other middleware
-app.use(upload.single('avatar'));
+app.use((req, res, next) => {
+    // Skip multer for backup restore endpoint
+    if (req.path === '/api/users/restore-backup') {
+        return next();
+    }
+    // Apply avatar upload for other endpoints
+    upload.single('avatar')(req, res, next);
+});
 app.use(multerMonkeyPatch);
 
 app.get('/version', async function (_, response) {

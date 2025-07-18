@@ -253,7 +253,7 @@ async function createUser(form, callback) {
  */
 async function backupUserData(handle, callback) {
     try {
-        toastr.info('Please wait for the download to start.', 'Backup Requested');
+        toastr.info('正在准备备份，请稍候...', '备份请求中');
         const response = await fetch('/api/users/backup', {
             method: 'POST',
             headers: getRequestHeaders(),
@@ -261,24 +261,43 @@ async function backupUserData(handle, callback) {
         });
 
         if (!response.ok) {
-            const data = await response.json();
-            toastr.error(data.error || 'Unknown error', 'Failed to backup user data');
-            throw new Error('Failed to backup user data');
+            let errorMessage = '备份失败';
+            try {
+                const data = await response.json();
+                errorMessage = data.error || `HTTP ${response.status}`;
+            } catch {
+                errorMessage = `HTTP ${response.status}`;
+            }
+            toastr.error(errorMessage, '备份失败');
+            throw new Error('Failed to backup user data: ' + errorMessage);
         }
 
         const blob = await response.blob();
         const header = response.headers.get('Content-Disposition');
+        
+        if (!header) {
+            toastr.error('服务器响应格式错误', '备份失败');
+            throw new Error('Invalid server response');
+        }
+
         const parts = header.split(';');
         const filename = parts[1].split('=')[1].replaceAll('"', '');
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
         a.download = filename;
+        document.body.appendChild(a);
         a.click();
+        document.body.removeChild(a);
         URL.revokeObjectURL(url);
+        
+        toastr.success('备份文件下载成功', '备份完成');
         callback();
     } catch (error) {
         console.error('Error backing up user data:', error);
+        if (!error.message.includes('备份失败')) {
+            toastr.error(error.message || '未知错误', '备份失败');
+        }
     }
 }
 
@@ -302,43 +321,30 @@ async function restoreUserData(handle, backupFile, callback) {
             throw new Error('Restore backup cancelled');
         }
 
-        toastr.info('Please wait while the backup is being restored...', 'Restore in Progress');
+        toastr.info('正在处理备份文件...', '恢复进行中');
 
+        // 使用单一请求直接上传和应用备份
         const formData = new FormData();
-        formData.append('file', backupFile);
-        formData.append('handle', handle);
-
-        // Only include CSRF token for FormData uploads
-        const headers = {};
-        const requestHeaders = getRequestHeaders();
-        if (requestHeaders['X-CSRF-Token']) {
-            headers['X-CSRF-Token'] = requestHeaders['X-CSRF-Token'];
-        }
+        formData.append('backupFile', backupFile);
 
         const response = await fetch('/api/users/restore-backup', {
             method: 'POST',
-            headers: headers,
             body: formData,
         });
 
         if (!response.ok) {
-            let errorMessage = 'Unknown error';
+            let errorMessage = '恢复备份失败';
             try {
-                const data = await response.json();
-                errorMessage = data.error || 'Unknown error';
-            } catch (e) {
-                // If response is not JSON, try to get text
-                try {
-                    errorMessage = await response.text() || `HTTP ${response.status}`;
-                } catch (e2) {
-                    errorMessage = `HTTP ${response.status}`;
-                }
+                const errorData = await response.json();
+                errorMessage = errorData.error || `HTTP ${response.status}`;
+            } catch {
+                errorMessage = `HTTP ${response.status}`;
             }
-            toastr.error(errorMessage, 'Failed to restore backup');
+            toastr.error(errorMessage, '恢复备份失败');
             throw new Error('Failed to restore backup: ' + errorMessage);
         }
 
-        toastr.success('Backup restored successfully. The page will reload to apply changes.', 'Backup Restored');
+        toastr.success('备份恢复成功。页面将重新加载以应用更改。', '备份已恢复');
         setTimeout(() => {
             location.reload();
         }, 2000);
@@ -346,7 +352,7 @@ async function restoreUserData(handle, backupFile, callback) {
     } catch (error) {
         console.error('Error restoring user data:', error);
         if (error.message !== 'Restore backup cancelled') {
-            toastr.error(error.message || 'Unknown error', 'Failed to restore backup');
+            toastr.error(error.message || '未知错误', '恢复备份失败');
         }
     }
 }
@@ -892,7 +898,7 @@ async function openUserProfile() {
         }
 
         if (!file.name.endsWith('.zip')) {
-            toastr.error('Please select a valid backup file (.zip)', 'Invalid File');
+            toastr.error('请选择有效的备份文件（.zip格式）', '文件格式错误');
             return;
         }
 

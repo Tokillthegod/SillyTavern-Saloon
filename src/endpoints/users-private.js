@@ -1,4 +1,5 @@
 import path from 'node:path';
+import fs from 'node:fs';
 import { promises as fsPromises } from 'node:fs';
 import crypto from 'node:crypto';
 
@@ -15,24 +16,6 @@ const RESET_CACHE = new Cache(5 * 60 * 1000);
 
 // Configure multer for backup file uploads
 const uploadsPath = path.join(globalThis.DATA_ROOT, UPLOADS_DIRECTORY);
-const backupUpload = multer({ 
-    dest: uploadsPath, 
-    limits: { 
-        fieldSize: 50 * 1024 * 1024, // 50MB field size limit
-        fileSize: 500 * 1024 * 1024, // 500MB file size limit
-        files: 1, // Only allow 1 file
-        fields: 10, // Allow multiple fields
-        parts: 100 // Allow more parts
-    },
-    fileFilter: (req, file, cb) => {
-        // Accept zip files
-        if (file.mimetype === 'application/zip' || file.originalname.endsWith('.zip')) {
-            cb(null, true);
-        } else {
-            cb(new Error('Only ZIP files are allowed'), false);
-        }
-    }
-});
 
 export const router = express.Router();
 
@@ -172,56 +155,69 @@ router.post('/backup', async (request, response) => {
             return response.status(403).json({ error: 'Unauthorized' });
         }
 
+        // Check if user exists
+        const user = await storage.getItem(toKey(handle));
+        if (!user) {
+            console.error('Backup failed: User not found');
+            return response.status(404).json({ error: 'User not found' });
+        }
+
         await createBackupArchive(handle, response);
     } catch (error) {
         console.error('Backup failed', error);
-        return response.sendStatus(500);
+        return response.status(500).json({ error: 'Backup creation failed: ' + error.message });
     }
 });
 
+// Simplified backup restore - single request
 router.post('/restore-backup', (request, response) => {
-    // Handle multer upload with custom error handling
-    backupUpload.single('file')(request, response, async (err) => {
+    const upload = multer({
+        dest: uploadsPath,
+        limits: {
+            fileSize: 500 * 1024 * 1024, // 500MB
+            files: 1
+        },
+        fileFilter: (req, file, cb) => {
+            if (file.originalname.endsWith('.zip')) {
+                cb(null, true);
+            } else {
+                cb(new Error('Only ZIP files are allowed'), false);
+            }
+        }
+    }).single('backupFile');
+
+    upload(request, response, async (err) => {
         try {
             if (err) {
-                console.error('Multer error:', err);
-                if (err.code === 'LIMIT_FILE_SIZE') {
-                    return response.status(400).json({ error: 'File too large. Maximum size is 500MB.' });
-                } else if (err.code === 'LIMIT_UNEXPECTED_FILE') {
-                    return response.status(400).json({ error: 'Unexpected file field.' });
-                } else {
-                    return response.status(400).json({ error: err.message || 'File upload error' });
-                }
-            }
-
-            console.log('Restore backup request received');
-            console.log('Request body:', request.body);
-            console.log('Request file:', request.file ? { 
-                filename: request.file.filename, 
-                originalname: request.file.originalname,
-                size: request.file.size, 
-                mimetype: request.file.mimetype 
-            } : 'No file');
-
-            const handle = request.body.handle || request.user.profile.handle;
-
-            if (handle !== request.user.profile.handle && !request.user.profile.admin) {
-                console.error('Restore backup failed: Unauthorized');
-                return response.status(403).json({ error: 'Unauthorized' });
+                console.error('Upload error:', err);
+                return response.status(400).json({ error: err.message });
             }
 
             if (!request.file) {
-                console.warn('Restore backup failed: No file uploaded');
-                return response.status(400).json({ error: 'No backup file provided' });
+                return response.status(400).json({ error: 'No file uploaded' });
             }
 
-            console.log('Starting backup restore for handle:', handle);
-            await restoreBackupArchive(handle, request.file.path);
+            const backupFile = request.file;
+            const targetHandle = request.user.profile.handle; // Use current user
+
+            // Check if user exists
+            const user = await storage.getItem(toKey(targetHandle));
+            if (!user) {
+                return response.status(404).json({ error: 'User not found' });
+            }
+
+            console.log('Starting backup restore for user:', targetHandle);
+            console.log('Backup file:', backupFile.originalname);
+
+            // Restore using the uploaded file
+            await restoreBackupArchive(targetHandle, backupFile.path);
+            
             console.log('Backup restore completed successfully');
-            return response.sendStatus(204);
+            return response.json({ success: true, message: 'Backup restored successfully' });
+
         } catch (error) {
-            console.error('Restore backup failed', error);
-            return response.status(500).json({ error: error.message || 'Failed to restore backup' });
+            console.error('Backup restore failed:', error);
+            return response.status(500).json({ error: 'Backup restore failed: ' + error.message });
         }
     });
 });
