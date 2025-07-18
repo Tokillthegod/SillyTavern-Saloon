@@ -232,6 +232,8 @@ function configureDiscreetLogin() {
 
     $('#showRegisterButton').off('click').on('click', () => {
         $('#passwordEntryBlock').hide();
+        $('#handleEntryBlock').hide();
+        $('#discreetLoginPrompt').hide();
         $('#registerBlock').show();
     });
 
@@ -260,7 +262,9 @@ function configureDiscreetLogin() {
 
     $('#cancelRegister').off('click').on('click', () => {
         $('#registerBlock').hide();
+        $('#handleEntryBlock').show();
         $('#passwordEntryBlock').show();
+        $('#discreetLoginPrompt').show();
         $('#errorMessage').text('');
         // Clear registration form
         $('#registerName').val('');
