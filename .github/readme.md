@@ -70,7 +70,7 @@
 
 ## 🔗 项目链接
 
-- **GitHub 仓库**：[SanVenturas/SillyTavern](https://github.com/SanVenturas/SillyTavern)
+- **GitHub 仓库**：[SanVenturas/Silly-Saloon](https://github.com/SanVenturas/Silly-Saloon)
 - **原项目**：[SillyTavern/SillyTavern](https://github.com/SillyTavern/SillyTavern)
 
 ---

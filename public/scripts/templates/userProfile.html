@@ -1,29 +1,29 @@
-<div class="flex-container flexFlowColumn justifyLeft flexGap10">
+﻿<div class="flex-container flexFlowColumn justifyLeft flexGap10">
     <div>
         <h2 class="marginBot10 flex-container">
-            <span data-i18n="Hi,">Hi,</span><span class="userName margin0"></span>
-            <div data-require-accounts class="userChangeNameButton right_menu_button" title="Change display name.">
+            <span data-i18n="Hi,">您好，</span><span class="userName margin0"></span>
+            <div data-require-accounts class="userChangeNameButton right_menu_button" title="更改显示名称。">
                 <i class="fa-fw fa-solid fa-pencil fa-xs"></i>
             </div>
         </h2>
         <div class="accountsDisabledHint" style="display: none;">
-            <span data-i18n="To enable multi-account features, restart the SillyTavern server with">To enable multi-account features, restart the SillyTavern server with</span> <code>enableUserAccounts</code> <span data-i18n="set to true in the config.yaml file.">set to true in the config.yaml file.</span>
+            <span data-i18n="To enable multi-account features, restart the SillyTavern server with">要启用多账户功能，请重启 SillyTavern 服务器并在 config.yaml 文件中将</span> <code>enableUserAccounts</code> <span data-i18n="set to true in the config.yaml file.">设置为 true。</span>
         </div>
     </div>
     <div>
         <h3 data-i18n="Account Info">
-            Account Info
+            账户信息
         </h3>
         <div class="flex-container flexGap10">
             <div class="flex-container flexFlowColumn alignItemsCenter flexNoGap">
-                <div class="avatar" data-i18n="[title]To change your user avatar, use the buttons below or select a default persona in the Persona Management menu." title="To change your user avatar, use the buttons below or select a default persona in the Persona Management menu.">
+                <div class="avatar" data-i18n="[title]To change your user avatar, use the buttons below or select a default persona in the Persona Management menu." title="要更改您的用户头像，请使用下面的按钮或在角色管理菜单中选择默认角色。">
                     <img src="img/ai4.png" alt="avatar">
                 </div>
                 <div class="flex-container alignItemsCenter">
-                    <div class="userAvatarChange right_menu_button" data-i18n="[title]Set your custom avatar." title="Set your custom avatar.">
+                    <div class="userAvatarChange right_menu_button" data-i18n="[title]Set your custom avatar." title="设置您的自定义头像。">
                         <i class="fa-fw fa-solid fa-image"></i>
                     </div>
-                    <div class="userAvatarRemove right_menu_button" data-i18n="[title]Remove your custom avatar." title="Remove your custom avatar.">
+                    <div class="userAvatarRemove right_menu_button" data-i18n="[title]Remove your custom avatar." title="移除您的自定义头像。">
                         <i class="fa-fw fa-solid fa-trash"></i>
                     </div>
                 </div>
@@ -34,28 +34,28 @@
             <div class="flex1 flex-container flexGap10">
                 <div class="flex-container flexFlowColumn">
                     <div>
-                        <span data-i18n="Handle:">Handle:</span>
+                        <span data-i18n="Handle:">用户名：</span>
                         <span class="userHandle"></span>
                     </div>
                     <div>
-                        <span data-i18n="Role:">Role:</span>
+                        <span data-i18n="Role:">角色：</span>
                         <span class="userRole"></span>
                     </div>
                 </div>
                 <div class="flex-container flexFlowColumn">
                     <div>
-                        <span data-i18n="Created:">Created:</span>
+                        <span data-i18n="Created:">创建时间：</span>
                         <span class="userCreated"></span>
                     </div>
                     <div>
-                        <span data-i18n="Password:">Password:</span>
-                        <i class="hasPassword fa-fw fa-solid fa-lock" data-i18n="[title]This account is password protected." title="This account is password protected."></i>
-                        <i class="noPassword fa-fw fa-solid fa-lock-open" data-i18n="[title]This account is not password protected." title="This account is not password protected."></i>
+                        <span data-i18n="Password:">密码：</span>
+                        <i class="hasPassword fa-fw fa-solid fa-lock" data-i18n="[title]This account is password protected." title="此账户已设置密码保护。"></i>
+                        <i class="noPassword fa-fw fa-solid fa-lock-open" data-i18n="[title]This account is not password protected." title="此账户未设置密码保护。"></i>
                     </div>
                     <div>
-                        <span>Security Question:</span>
-                        <i class="hasSecurityQuestion fa-fw fa-solid fa-shield-check" title="Security question is set" style="color: #4CAF50;"></i>
-                        <i class="noSecurityQuestion fa-fw fa-solid fa-shield-xmark" title="Security question is not set" style="color: #f44336;"></i>
+                        <span>安全问题：</span>
+                        <i class="hasSecurityQuestion fa-fw fa-solid fa-shield-check" title="已设置安全问题" style="color: #4CAF50;"></i>
+                        <i class="noSecurityQuestion fa-fw fa-solid fa-shield-xmark" title="未设置安全问题" style="color: #f44336;"></i>
                     </div>
                 </div>
             </div>
@@ -63,33 +63,33 @@
     </div>
     <div>
         <h3 data-i18n="Account Actions">
-            Account Actions
+            账户操作
         </h3>
         <div class="flex-container flexFlowColumn flexNoGap">
             <div data-require-accounts class="flex-container">
-                <div class="userChangePasswordButton menu_button menu_button_icon" title="Change your password.">
+                <div class="userChangePasswordButton menu_button menu_button_icon" title="更改您的密码。">
                     <i class="fa-fw fa-solid fa-key"></i>
-                    <span data-i18n="Change Password">Change Password</span>
+                    <span data-i18n="Change Password">更改密码</span>
                 </div>
-                <div class="userSetSecurityQuestionButton menu_button menu_button_icon" title="Set security question for password recovery">
+                <div class="userSetSecurityQuestionButton menu_button menu_button_icon" title="设置密码找回的安全问题">
                     <i class="fa-fw fa-solid fa-shield-halved"></i>
-                    <span>Set Security Question</span>
+                    <span>设置安全问题</span>
                 </div>
             </div>
             <div class="flex-container">
-                <div class="userSettingsSnapshotsButton menu_button menu_button_icon" data-i18n="[title]Manage your settings snapshots." title="Manage your settings snapshots.">
+                <div class="userSettingsSnapshotsButton menu_button menu_button_icon" data-i18n="[title]Manage your settings snapshots." title="管理您的设置快照。">
                     <i class="fa-fw fa-solid fa-camera"></i>
-                    <span data-i18n="Settings Snapshots">Settings Snapshots</span>
+                    <span data-i18n="Settings Snapshots">设置快照</span>
                 </div>
-                <div class="userBackupButton menu_button menu_button_icon" data-i18n="[title]Download a complete backup of your user data." title="Download a complete backup of your user data.">
+                <div class="userBackupButton menu_button menu_button_icon" data-i18n="[title]Download a complete backup of your user data." title="下载您的用户数据的完整备份。">
                     <i class="fa-fw fa-solid fa-download"></i>
-                    <span data-i18n="Download Backup">Download Backup</span>
+                    <span data-i18n="Download Backup">下载备份</span>
                 </div>
             </div>
             <div class="flex-container">
-                <div class="userRestoreBackupButton menu_button menu_button_icon" data-i18n="[title]Restore user data from a backup file." title="Restore user data from a backup file.">
+                <div class="userRestoreBackupButton menu_button menu_button_icon" data-i18n="[title]Restore user data from a backup file." title="从备份文件恢复用户数据。">
                     <i class="fa-fw fa-solid fa-upload"></i>
-                    <span data-i18n="Apply Backup">Apply Backup</span>
+                    <span data-i18n="Apply Backup">应用备份</span>
                 </div>
             </div>
             <form style="display: none;">
@@ -99,16 +99,16 @@
     </div>
     <div>
         <h3 data-i18n="Danger Zone">
-            Danger Zone
+            危险区域
         </h3>
         <div class="flex-container">
-            <div class="userResetSettingsButton menu_button menu_button_icon" data-i18n="[title]Reset your settings to factory defaults." title="Reset your settings to factory defaults.">
+            <div class="userResetSettingsButton menu_button menu_button_icon" data-i18n="[title]Reset your settings to factory defaults." title="将您的设置重置为出厂默认值。">
                 <i class="fa-fw fa-solid fa-cog warning"></i>
-                <span data-i18n="Reset Settings">Reset Settings</span>
+                <span data-i18n="Reset Settings">重置设置</span>
             </div>
-            <div class="userResetAllButton menu_button menu_button_icon" data-i18n="[title]Wipe all user data and reset your account to factory settings." title="Wipe all user data and reset your account to factory settings.">
+            <div class="userResetAllButton menu_button menu_button_icon" data-i18n="[title]Wipe all user data and reset your account to factory settings." title="清除所有用户数据并将您的账户重置为出厂设置。">
                 <i class="fa-fw fa-solid fa-skull warning"></i>
-                <span data-i18n="Reset Everything">Reset Everything</span>
+                <span data-i18n="Reset Everything">重置所有内容</span>
             </div>
         </div>
     </div>
