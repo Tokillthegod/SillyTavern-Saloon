@@ -1,6 +1,7 @@
 # SillyTavern 多用户分支
 
 这是 SillyTavern 的一个分支版本，专为支持多用户环境而设计，并针对中文用户进行了优化。
+demo：`tavern.zerotype.pp.ua`
 
 ## 🌟 主要特性
 
