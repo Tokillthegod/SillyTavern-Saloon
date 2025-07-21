@@ -47,6 +47,8 @@ import { router as scaleAltRouter } from './endpoints/backends/scale-alt.js';
 import { router as speechRouter } from './endpoints/speech.js';
 import { router as azureRouter } from './endpoints/azure.js';
 import { router as dataMaidRouter } from './endpoints/data-maid.js';
+import { router as adminPanelRouter } from './endpoints/admin-panel.js';
+import { router as serverStatsRouter } from './endpoints/server-stats.js';
 
 /**
  * @typedef {object} ServerStartupResult
@@ -175,6 +177,8 @@ export function setupPrivateEndpoints(app) {
     app.use('/api/speech', speechRouter);
     app.use('/api/azure', azureRouter);
     app.use('/api/data-maid', dataMaidRouter);
+    app.use('/api/admin', adminPanelRouter);
+    app.use('/api/server-stats', serverStatsRouter);
 }
 
 /**

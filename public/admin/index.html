@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SillyTavern 管理面板</title>
+    
+    <!-- 引入主样式文件 -->
+    <link rel="stylesheet" href="/css/st-tailwind.css">
+    <link rel="stylesheet" href="/css/fontawesome.min.css">
+    <link rel="stylesheet" href="/css/solid.min.css">
+    <link rel="stylesheet" href="/css/brands.min.css">
+    <link rel="stylesheet" href="/css/jquery-ui.min.css">
+    <link rel="stylesheet" href="/css/toastr.min.css">
+    
+    <!-- 管理面板专用样式 -->
+    <link rel="stylesheet" href="/admin/css/admin.css">
+    
+    <!-- Chart.js for statistics -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="admin-panel">
+    <div id="admin-app" class="admin-container">
+        <!-- 顶部导航栏 -->
+        <header class="admin-header">
+            <div class="admin-header-content">
+                <div class="admin-logo">
+                    <h1><i class="fas fa-cogs"></i> SillyTavern 管理面板</h1>
+                </div>
+                <div class="admin-user-info">
+                    <span id="current-user-name">管理员</span>
+                    <a href="/" class="btn btn-secondary">返回主界面</a>
+                    <button id="logout-btn" class="btn btn-danger">退出登录</button>
+                </div>
+            </div>
+        </header>
+
+        <!-- 侧边导航 -->
+        <nav class="admin-sidebar">
+            <ul class="admin-nav-menu">
+                <li class="nav-item active" data-tab="dashboard">
+                    <a href="#dashboard">
+                        <i class="fas fa-tachometer-alt"></i>
+                        <span>仪表板</span>
+                    </a>
+                </li>
+                <li class="nav-item" data-tab="users">
+                    <a href="#users">
+                        <i class="fas fa-users"></i>
+                        <span>用户管理</span>
+                    </a>
+                </li>
+                <li class="nav-item" data-tab="storage">
+                    <a href="#storage">
+                        <i class="fas fa-hdd"></i>
+                        <span>存储管理</span>
+                    </a>
+                </li>
+                <li class="nav-item" data-tab="stats">
+                    <a href="#stats">
+                        <i class="fas fa-chart-line"></i>
+                        <span>服务器统计</span>
+                    </a>
+                </li>
+                <li class="nav-item" data-tab="system">
+                    <a href="#system">
+                        <i class="fas fa-server"></i>
+                        <span>系统信息</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+
+        <!-- 主内容区域 -->
+        <main class="admin-main">
+            <!-- 仪表板页面 -->
+            <div id="dashboard-tab" class="admin-tab-content active">
+                <div class="admin-page-header">
+                    <h2>仪表板</h2>
+                    <p>服务器状态概览</p>
+                </div>
+                
+                <div class="dashboard-grid">
+                    <!-- 系统状态卡片 -->
+                    <div class="dashboard-card">
+                        <div class="card-header">
+                            <h3><i class="fas fa-heartbeat"></i> 系统状态</h3>
+                        </div>
+                        <div class="card-content">
+                            <div class="status-item">
+                                <span class="status-label">运行时间:</span>
+                                <span id="system-uptime" class="status-value">-</span>
+                            </div>
+                            <div class="status-item">
+                                <span class="status-label">内存使用:</span>
+                                <span id="memory-usage" class="status-value">-</span>
+                            </div>
+                            <div class="status-item">
+                                <span class="status-label">CPU核心:</span>
+                                <span id="cpu-cores" class="status-value">-</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 用户统计卡片 -->
+                    <div class="dashboard-card">
+                        <div class="card-header">
+                            <h3><i class="fas fa-users"></i> 用户统计</h3>
+                        </div>
+                        <div class="card-content">
+                            <div class="status-item">
+                                <span class="status-label">总用户数:</span>
+                                <span id="total-users" class="status-value">-</span>
+                            </div>
+                            <div class="status-item">
+                                <span class="status-label">管理员:</span>
+                                <span id="admin-users" class="status-value">-</span>
+                            </div>
+                            <div class="status-item">
+                                <span class="status-label">启用用户:</span>
+                                <span id="enabled-users" class="status-value">-</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 请求统计卡片 -->
+                    <div class="dashboard-card">
+                        <div class="card-header">
+                            <h3><i class="fas fa-exchange-alt"></i> 请求统计</h3>
+                        </div>
+                        <div class="card-content">
+                            <div class="status-item">
+                                <span class="status-label">当前分钟:</span>
+                                <span id="current-requests" class="status-value">-</span>
+                            </div>
+                            <div class="status-item">
+                                <span class="status-label">最近5分钟:</span>
+                                <span id="recent-requests" class="status-value">-</span>
+                            </div>
+                            <div class="status-item">
+                                <span class="status-label">10分钟平均:</span>
+                                <span id="average-requests" class="status-value">-</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 存储统计卡片 -->
+                    <div class="dashboard-card">
+                        <div class="card-header">
+                            <h3><i class="fas fa-hdd"></i> 存储统计</h3>
+                        </div>
+                        <div class="card-content">
+                            <div class="status-item">
+                                <span class="status-label">总存储:</span>
+                                <span id="total-storage" class="status-value">计算中...</span>
+                            </div>
+                            <div class="status-item">
+                                <span class="status-label">平均每用户:</span>
+                                <span id="average-storage" class="status-value">计算中...</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 实时请求图表 -->
+                <div class="dashboard-chart">
+                    <div class="card-header">
+                        <h3><i class="fas fa-chart-line"></i> 实时请求统计</h3>
+                        <div class="chart-controls">
+                            <select id="chart-timeframe">
+                                <option value="2">2分钟</option>
+                                <option value="4">4分钟</option>
+                                <option value="6">6分钟</option>
+                                <option value="8">8分钟</option>
+                                <option value="10" selected>10分钟</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="requests-chart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 用户管理页面 -->
+            <div id="users-tab" class="admin-tab-content">
+                <div class="admin-page-header">
+                    <h2>用户管理</h2>
+                    <div class="page-actions">
+                        <button id="refresh-users-btn" class="btn btn-primary">
+                            <i class="fas fa-sync"></i> 刷新
+                        </button>
+                        <button id="calculate-storage-btn" class="btn btn-secondary">
+                            <i class="fas fa-calculator"></i> 计算存储
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 用户搜索和过滤 -->
+                <div class="users-filters">
+                    <div class="filter-group">
+                        <input type="text" id="user-search" placeholder="搜索用户..." class="form-control">
+                    </div>
+                    <div class="filter-group">
+                        <select id="user-filter" class="form-control">
+                            <option value="all">所有用户</option>
+                            <option value="admin">管理员</option>
+                            <option value="enabled">启用用户</option>
+                            <option value="disabled">禁用用户</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- 用户列表 -->
+                <div class="users-list">
+                    <div id="users-loading" class="loading-spinner">
+                        <i class="fas fa-spinner fa-spin"></i> 加载中...
+                    </div>
+                    <div id="users-container"></div>
+                </div>
+
+                <!-- 分页控件 -->
+                <div class="pagination-container">
+                    <div id="users-pagination"></div>
+                </div>
+            </div>
+
+            <!-- 存储管理页面 -->
+            <div id="storage-tab" class="admin-tab-content">
+                <div class="admin-page-header">
+                    <h2>存储管理</h2>
+                    <p>用户存储空间使用情况</p>
+                </div>
+                
+                <div id="storage-content">
+                    <div class="loading-spinner">
+                        <i class="fas fa-spinner fa-spin"></i> 正在计算存储使用情况...
+                    </div>
+                </div>
+            </div>
+
+            <!-- 服务器统计页面 -->
+            <div id="stats-tab" class="admin-tab-content">
+                <div class="admin-page-header">
+                    <h2>服务器统计</h2>
+                    <div class="page-actions">
+                        <div class="stats-controls">
+                            <label for="time-window-select">时间窗口:</label>
+                            <select id="time-window-select" class="form-control">
+                                <option value="2">2分钟</option>
+                                <option value="4">4分钟</option>
+                                <option value="6">6分钟</option>
+                                <option value="8">8分钟</option>
+                                <option value="10" selected>10分钟</option>
+                            </select>
+                        </div>
+                        <div class="stats-controls">
+                            <label>
+                                <input type="checkbox" id="auto-refresh-toggle"> 自动刷新
+                            </label>
+                        </div>
+                        <button id="refresh-stats-btn" class="btn btn-primary">
+                            <i class="fas fa-sync"></i> 刷新
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="stats-grid">
+                    <!-- 服务器状态卡片 -->
+                    <div class="stats-card">
+                        <div class="card-header">
+                            <h3><i class="fas fa-server"></i> 服务器状态</h3>
+                        </div>
+                        <div class="card-content">
+                            <div class="status-item">
+                                <span class="status-label">运行时间:</span>
+                                <span id="server-uptime" class="status-value">-</span>
+                            </div>
+                            <div class="status-item">
+                                <span class="status-label">总请求数:</span>
+                                <span id="total-requests" class="status-value">-</span>
+                            </div>
+                            <div class="status-item">
+                                <span class="status-label">活跃连接:</span>
+                                <span id="active-connections" class="status-value">-</span>
+                            </div>
+                            <div class="status-item">
+                                <span class="status-label">最后更新:</span>
+                                <span id="last-update-time" class="status-value">-</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 性能监控卡片 -->
+                    <div class="stats-card">
+                        <div class="card-header">
+                            <h3><i class="fas fa-tachometer-alt"></i> 性能监控</h3>
+                        </div>
+                        <div class="card-content">
+                            <div class="status-item">
+                                <span class="status-label">内存使用:</span>
+                                <span id="memory-usage" class="status-value">-</span>
+                            </div>
+                            <div class="progress-bar-container">
+                                <div class="progress-bar">
+                                    <div id="memory-progress" class="progress-fill"></div>
+                                </div>
+                                <span id="memory-percent" class="progress-text">0%</span>
+                            </div>
+                            <div class="status-item">
+                                <span class="status-label">CPU使用率:</span>
+                                <span id="cpu-usage" class="status-value">-</span>
+                            </div>
+                            <div class="progress-bar-container">
+                                <div class="progress-bar">
+                                    <div id="cpu-progress" class="progress-fill"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 请求统计图表 -->
+                <div class="chart-section">
+                    <div class="card-header">
+                        <h3><i class="fas fa-chart-line"></i> 请求统计图表</h3>
+                        <div class="chart-controls">
+                            <select id="stats-time-window-select">
+                                <option value="2">最近2分钟</option>
+                                <option value="4">最近4分钟</option>
+                                <option value="6">最近6分钟</option>
+                                <option value="8">最近8分钟</option>
+                                <option value="10" selected>最近10分钟</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="stats-requests-chart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 系统信息页面 -->
+            <div id="system-tab" class="admin-tab-content">
+                <div class="admin-page-header">
+                    <h2>系统信息</h2>
+                    <p>服务器硬件和软件信息</p>
+                </div>
+                
+                <div class="system-info-grid">
+                    <!-- 软件信息 -->
+                    <div class="system-card">
+                        <div class="card-header">
+                            <h3><i class="fas fa-code"></i> 软件信息</h3>
+                        </div>
+                        <div class="card-content">
+                            <div class="info-item">
+                                <span class="info-label">SillyTavern版本:</span>
+                                <span id="st-version" class="info-value">-</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">Node.js版本:</span>
+                                <span id="node-version" class="info-value">-</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">运行环境:</span>
+                                <span id="node-env" class="info-value">-</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">Git分支:</span>
+                                <span id="git-branch" class="info-value">-</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">Git提交:</span>
+                                <span id="git-commit" class="info-value">-</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 硬件信息 -->
+                    <div class="system-card">
+                        <div class="card-header">
+                            <h3><i class="fas fa-microchip"></i> 硬件信息</h3>
+                        </div>
+                        <div class="card-content">
+                            <div class="info-item">
+                                <span class="info-label">操作系统:</span>
+                                <span id="os-info" class="info-value">-</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">CPU架构:</span>
+                                <span id="cpu-arch" class="info-value">-</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">CPU核心数:</span>
+                                <span id="cpu-cores" class="info-value">-</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">总内存:</span>
+                                <span id="total-memory" class="info-value">-</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">可用内存:</span>
+                                <span id="free-memory" class="info-value">-</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 网络信息 -->
+                    <div class="system-card">
+                        <div class="card-header">
+                            <h3><i class="fas fa-network-wired"></i> 网络信息</h3>
+                        </div>
+                        <div class="card-content">
+                            <div class="info-item">
+                                <span class="info-label">监听地址:</span>
+                                <span id="listen-address" class="info-value">-</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">监听端口:</span>
+                                <span id="listen-port" class="info-value">-</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">HTTPS启用:</span>
+                                <span id="https-enabled" class="info-value">-</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">CORS代理:</span>
+                                <span id="cors-proxy" class="info-value">-</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 配置信息 -->
+                    <div class="system-card">
+                        <div class="card-header">
+                            <h3><i class="fas fa-cog"></i> 配置信息</h3>
+                        </div>
+                        <div class="card-content">
+                            <div class="info-item">
+                                <span class="info-label">数据目录:</span>
+                                <span id="data-root" class="info-value">-</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">白名单模式:</span>
+                                <span id="whitelist-mode" class="info-value">-</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">CSRF保护:</span>
+                                <span id="csrf-protection" class="info-value">-</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">自动启动浏览器:</span>
+                                <span id="auto-browser" class="info-value">-</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- 模态框 -->
+    <div id="user-detail-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>用户详情</h3>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="user-detail-content"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="delete-user-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>确认删除用户</h3>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p>您确定要彻底删除用户 <strong id="delete-user-name"></strong> 吗？</p>
+                <p class="warning-text">此操作将永久删除用户的所有数据，包括角色、聊天记录等，且无法恢复！</p>
+                <div class="modal-actions">
+                    <button id="confirm-delete-btn" class="btn btn-danger">确认删除</button>
+                    <button class="modal-close btn btn-secondary">取消</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 引入JavaScript库 -->
+    <script src="/lib/jquery-3.5.1.min.js"></script>
+    <script src="/lib/jquery-ui.min.js"></script>
+    <script src="/lib/toastr.min.js"></script>
+    
+    <!-- 管理面板JavaScript模块 -->
+    <script src="/admin/js/admin-main.js"></script>
+    <script src="/admin/js/user-management.js"></script>
+    <script src="/admin/js/server-monitor.js"></script>
+</body>
+</html>

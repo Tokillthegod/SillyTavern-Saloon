@@ -740,6 +740,10 @@ async function singleUserLogin(request) {
     if (userHandles.length === 1) {
         const user = await storage.getItem(toKey(userHandles[0]));
         if (user && !user.password) {
+            // Update last online time for auto-login
+            user.lastOnline = Date.now();
+            await storage.setItem(toKey(userHandles[0]), user);
+            
             request.session.handle = userHandles[0];
             return true;
         }
@@ -768,6 +772,10 @@ async function autheliaUserLogin(request) {
         if (remoteUser.toLowerCase() === userHandle) {
             const user = await storage.getItem(toKey(userHandle));
             if (user && user.enabled) {
+                // Update last online time for authelia auto-login
+                user.lastOnline = Date.now();
+                await storage.setItem(toKey(userHandle), user);
+                
                 request.session.handle = userHandle;
                 return true;
             }
@@ -808,6 +816,10 @@ async function basicUserLogin(request) {
             const user = await storage.getItem(toKey(userHandle));
             // Verify pass again here just to be sure
             if (user && user.enabled && user.password && user.password === getPasswordHash(password, user.salt)) {
+                // Update last online time for basic auth auto-login
+                user.lastOnline = Date.now();
+                await storage.setItem(toKey(userHandle), user);
+                
                 request.session.handle = userHandle;
                 return true;
             }

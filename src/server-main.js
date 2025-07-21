@@ -77,6 +77,7 @@ import { init as settingsInit } from './endpoints/settings.js';
 import { redirectDeprecatedEndpoints, ServerStartup, setupPrivateEndpoints } from './server-startup.js';
 import { diskCache } from './endpoints/characters.js';
 import { migrateFlatSecrets } from './endpoints/secrets.js';
+import { requestTrackingMiddleware } from './utils/request-tracker.js';
 
 // Unrestrict console logs display limit
 util.inspect.defaultOptions.maxArrayLength = null;
@@ -155,6 +156,9 @@ app.use(cookieSession({
 
 app.use(setUserDataMiddleware);
 
+// Request tracking middleware for statistics
+app.use(requestTrackingMiddleware);
+
 // CSRF Protection //
 if (!cliArgs.disableCsrf) {
     const csrfSyncProtection = csrfSync({
@@ -223,6 +227,12 @@ app.get('/callback/:source?', (request, response) => {
 
 // Host login page
 app.get('/login', loginPageMiddleware);
+
+// Admin panel page - requires admin authentication
+import { adminPageMiddleware } from './middleware/admin-auth.js';
+app.get('/admin', adminPageMiddleware, (req, res) => {
+    res.sendFile('admin/index.html', { root: path.join(serverDirectory, 'public') });
+});
 
 // Host frontend assets
 const webpackMiddleware = getWebpackServeMiddleware();

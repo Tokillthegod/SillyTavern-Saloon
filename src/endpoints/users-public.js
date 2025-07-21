@@ -90,6 +90,11 @@ router.post('/login', async (request, response) => {
         }
 
         await loginLimiter.delete(ip);
+        
+        // Update last online time
+        user.lastOnline = Date.now();
+        await storage.setItem(toKey(user.handle), user);
+        
         request.session.handle = user.handle;
         console.info('Login successful:', user.handle, 'from', ip, 'at', new Date().toLocaleString());
         return response.json({ handle: user.handle });
